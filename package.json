@@ -1,0 +1,23 @@
+{
+  "name": "when-will-get-japan-pr",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "build:spa": "nuxt build --mode spa"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@nuxt/ui": "^2.14.1",
+    "@nuxtjs/tailwindcss": "^6.11.4",
+    "nuxt": "^3.10.3",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@nuxtjs/color-mode": "^3.3.2"
+  }
+} 
