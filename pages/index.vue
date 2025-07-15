@@ -2,7 +2,7 @@
   <div class="my-8 space-y-8">
     <div class="text-center">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-        🇯🇵 何時永住権の審査が通る？
+        🇯🇵 永住権獲得予測
       </h1>
       <p class="text-sm text-gray-600 dark:text-gray-300 mb-8">
         A tool which predicts when you can get Japanese Permanent Residency on your application date.
@@ -58,8 +58,8 @@
     <UCard class="max-w-2xl mx-auto">
       <template #header>
         <div class="flex items-center gap-2">
-          <UIcon name="i-heroicons-arrow-trending-up" class="w-5 h-5" />
-          <h2 class="text-xl font-semibold">永住権獲得予測</h2>
+          <UIcon name="i-heroicons-queue-list" class="w-5 h-5" />
+          <h2 class="text-xl font-semibold">いつ永住権を申請しますか？</h2>
         </div>
       </template>
 
@@ -68,7 +68,7 @@
           v-model="appliedYear"
           :items="yearOptions"
           placeholder="Select year"
-          color="primary"
+          color="info"
           highlight
         />
 
@@ -77,7 +77,7 @@
             v-for="month in monthOptions"
             :key="month.value"
             :variant="appliedMonth === month.value ? 'solid' : 'soft'"
-            color="primary"
+            color="info"
             size="sm"
             @click="appliedMonth = month.value"
             class="text-center flex items-center justify-center py-2"
@@ -90,26 +90,38 @@
           @click="predictPR"
           :loading="loading"
           variant="subtle"
-          color="primary"
+          color="info"
           size="lg"
           class="w-full flex items-center justify-center"
         >
-          行くぞ！
+          予測する
         </UButton>
       </div>
     </UCard>
 
-    <UCard v-if="prediction" class="max-w-2xl mx-auto">        
+    <UCard v-if="prediction" class="max-w-2xl mx-auto">       
+        <template #header>
+          <div class="flex items-center gap-2">
+            <UIcon name="i-heroicons-arrow-trending-up" class="w-5 h-5" />
+            <h2 class="text-xl font-semibold">予測結果</h2>
+          </div>
+        </template> 
         <div class="space-y-4">
           <p v-if="prData" class="text-center text-sm text-gray-600 dark:text-gray-400">
             データ更新日: {{ new Date(prData.updatedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }) }}
           </p>
-          <UButton @click="showDataDetails = !showDataDetails" size="sm" color="info" variant="ghost" class="w-full">
-            {{ showDataDetails ? 'Hide' : 'Show' }} Data Details
-          </UButton>
-          <div v-if="showDataDetails" class="mt-4">
-            <pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-xs overflow-auto max-h-64">{{ JSON.stringify(prData, null, 2) }}</pre>
-          </div>
+          <UCollapsible>
+            <UButton size="sm" color="info" variant="ghost" class="w-full flex items-center justify-center">
+              生データを見る
+            </UButton>
+            <template #content>
+              <div class="mt-4">
+                <pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-xs overflow-auto max-h-64">
+                  {{ JSON.stringify(prData, null, 2) }}
+                </pre>
+              </div>
+            </template>
+          </UCollapsible>
           <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
             予測日: {{ prediction }}
           </p>
@@ -134,7 +146,6 @@ const prediction = ref<string | null>(null)
 const prData = ref<PRData | null>(null)
 const dataLoading = ref(true)
 const dataError = ref<string | null>(null)
-const showDataDetails = ref(false)
 
 // Fetch PR data from GitHub
 const fetchPRData = async () => {
@@ -151,11 +162,6 @@ const fetchPRData = async () => {
     dataLoading.value = false
   }
 }
-
-// Load data on component mount
-onMounted(() => {
-  // fetchPRData()
-})
 
 // Generate year options from 2020 to current year
 const yearOptions = computed(() => {
