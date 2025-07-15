@@ -81,7 +81,7 @@
           </UCollapsible>
                   
           <p v-if="availableDates.includes(appliedDate)" class="text-center text-sm text-gray-600 dark:text-gray-400">
-            If you applied in {{new Date(appliedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' } )}}, the remaining applications based on current processing status is approximately:
+            If you applied in {{new Date(appliedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' } )}}, the remaining applications based on current processing status is approximately:
           </p>
           <div v-else>
             <UAlert
@@ -92,12 +92,40 @@
             />
             <br>
             <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-              If you applied in {{new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' } )}}, the remaining applications based on current processing status is approximately:
+              If you applied in {{new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' } )}}, the current processing status is approximately:
             </p>
           </div>
-          <p class="text-center text-2xl font-bold text-blue-600 dark:text-blue-400">
-            <UIcon name="i-heroicons-users" class="size-4 mx-2" /> {{ remainingCount }}
-          </p>  
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex font-bold items-center justify-center text-blue-600 dark:text-blue-400 space-x-2 border-2 border-blue-600 dark:border-blue-400 rounded-lg p-4">
+              <UIcon name="i-heroicons-users" class="size-6" /> 
+              <div class="space-x-2">
+                <span class="text-2xl">{{ remainingCount }}</span> 
+                <span class="text-sm">in queue</span>
+              </div>
+            </div>
+            <div class="flex font-bold items-center justify-center text-green-600 dark:text-green-400 space-x-2 border-2 border-green-600 dark:border-green-400 rounded-lg p-4">
+              <UIcon name="i-heroicons-document-check" class="size-6" /> 
+              <div class="space-x-2">
+                <span class="text-2xl">{{ averageMonthlyProcessed.toLocaleString() }}</span> 
+                <span class="text-sm">monthly solved</span>
+              </div>
+            </div>
+            <div class="flex font-bold items-center justify-center text-rose-600 dark:text-rose-400 space-x-2 border-2 border-rose-600 dark:border-rose-400 rounded-lg p-4">
+              <UIcon name="i-heroicons-inbox-arrow-down" class="size-6" /> 
+              <div class="space-x-2">
+                <span class="text-2xl">{{ averageMonthlyNewApplication.toLocaleString() }}</span> 
+                <span class="text-sm">monthly new</span>
+              </div>
+            </div>
+            <div class="flex font-bold items-center justify-center text-amber-600 dark:text-amber-400 space-x-2 border-2 border-amber-600 dark:border-amber-400 rounded-lg p-4">
+              <UIcon name="i-heroicons-clock" class="size-6" /> 
+              <div class="space-x-2">
+                <span class="text-2xl">10~18</span> 
+                <span class="text-sm">months to solve</span>
+              </div>
+            </div>
+          </div>
         </div>
       </UCard>
   </div>
@@ -145,6 +173,8 @@ const monthOptions = computed(() => {
 const loading = ref(false)
 const prediction = ref<string | null>(null)
 const prData = ref<PRData | null>(null)
+const averageMonthlyProcessed = ref<number>(0)
+const averageMonthlyNewApplication = ref<number>(0)
 const remainingCount = ref<string>('0')
 const dataLoading = ref(true)
 const dataError = ref<string | null>(null)
@@ -159,9 +189,6 @@ const latestAvailableDate = computed(() => {
   const dates = availableDates.value
   return dates.length > 0 ? dates[dates.length - 1] : ''
 })
-// const isDateAvailable = computed(() => {
-//   return availableDates.value.includes(appliedDate.value)
-// })
 
 // Fetch PR data from GitHub
 const fetchPRData = async () => {
@@ -195,6 +222,10 @@ const predictPR = async () => {
   // Use the loaded PR data for prediction
   if (prData.value) {
     appliedDate.value = `${appliedYear.value}-${appliedMonth.value}`
+
+    averageMonthlyProcessed.value = getAverageMonthlyProcessed(prData.value)
+    averageMonthlyNewApplication.value = getAverageMonthlyNewApplication(prData.value)
+
     // Check if the applied date is available in the data
     if (!availableDates.value.includes(appliedDate.value)) {
       prediction.value = `Latest data has not been updated yet.`
@@ -204,23 +235,8 @@ const predictPR = async () => {
       return
     }
     
-    const appliedMonthData = prData.value.data[appliedDate.value]
-    const initialValue = getCategoryValue(appliedMonthData, "100000")
-    
-    // Get all months after the applied month
-    const appliedMonthIndex = availableDates.value.indexOf(appliedDate.value)
-    const followingMonths = availableDates.value.slice(appliedMonthIndex + 1)
-    
-    // Sum up all categories["300000"] values from following months
-    const totalProcessed = followingMonths.reduce((sum, month) => {
-      const monthData = prData.value!.data[month]
-      return sum + getCategoryValue(monthData, "300000")
-    }, 0)
-    
-    // Calculate remaining applications
-    const remaining = Math.max(0, initialValue - totalProcessed)
-    
-    prediction.value = `If you applied in ${appliedDate.value}, approximately ${remaining.toLocaleString()} applications remain based on current processing status.`
+    // Calculate remaining applications using utility function
+    const remaining = getRemainingApplications(prData.value, appliedDate.value)
     remainingCount.value = remaining.toLocaleString()
   }
   
