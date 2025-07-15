@@ -76,9 +76,13 @@
               </div>
             </template>
           </UCollapsible>
-          <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            予測日: {{ prediction }}
+                  
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+            {{ appliedYear }}-{{ appliedMonth }}に申請した場合、現在の処理状況で残っているの件数は約:
           </p>
+          <p class="text-center text-2xl font-bold text-blue-600 dark:text-blue-400">
+            {{ remainingCount }}
+          </p>  
         </div>
       </UCard>
   </div>
@@ -98,6 +102,7 @@ const appliedMonth = ref<string>((new Date().getMonth() + 1).toString().padStart
 const loading = ref(false)
 const prediction = ref<string | null>(null)
 const prData = ref<PRData | null>(null)
+const remainingCount = ref<string>('0')
 const dataLoading = ref(true)
 const dataError = ref<string | null>(null)
 
@@ -156,17 +161,40 @@ const predictPR = async () => {
   }
   
   // Use the loaded PR data for prediction
-  setTimeout(() => {
-    if (!!prData.value) {
-      console.log('prData.value', new Date(prData.value.updatedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }))
-      // if (prData.value) {
-      //   // You can use the actual PR data here for more accurate predictions
-      //   console.log('Using PR data for prediction:', prData.value)
-      // }
-      // Example: Just echo the input for now
-      prediction.value = `You applied in ${appliedYear.value}-${appliedMonth.value}`
+  if (prData.value) {
+    const appliedDate = `${appliedYear.value}-${appliedMonth.value}`
+    
+    // Get the categories["100000"] value for the applied month
+    const appliedMonthData = prData.value.data[appliedDate]
+    if (!appliedMonthData) {
+      prediction.value = `最新データがまだ更新されていません。`
+      let dateKeys = Object.keys(prData.value.data).sort()
+      let latestDate = dateKeys[dateKeys.length - 1]
+      remainingCount.value = parseInt(prData.value.data[latestDate].categories["100000"].value).toLocaleString()
       loading.value = false
+      return
     }
-  }, 2000)
+    
+    const initialValue = parseInt(appliedMonthData.categories["100000"].value)
+    
+    // Get all months after the applied month
+    const allMonths = Object.keys(prData.value.data).sort()
+    const appliedMonthIndex = allMonths.indexOf(appliedDate)
+    const followingMonths = allMonths.slice(appliedMonthIndex + 1)
+    
+    // Sum up all categories["300000"] values from following months
+    let totalProcessed = 0
+    for (const month of followingMonths) {
+      const monthData = prData.value.data[month]
+      if (monthData && monthData.categories["300000"]) {
+        totalProcessed += parseInt(monthData.categories["300000"].value)
+      }
+    }
+    
+    // Calculate remaining applications
+    remainingCount.value = (initialValue - totalProcessed).toLocaleString()
+  }
+  
+  loading.value = false
 }
 </script> 
