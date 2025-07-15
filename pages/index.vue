@@ -9,52 +9,6 @@
       </p>
     </div>
 
-    <!-- Data Loading Status -->
-    <!-- <UCard v-if="dataLoading || dataError" class="max-w-2xl mx-auto">
-      <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-heroicons-document-text" class="w-5 h-5" />
-          <h2 class="text-xl font-semibold">Data Status</h2>
-        </div>
-      </template>
-      
-      <div class="text-center">
-        <div v-if="dataLoading" class="space-y-2">
-          <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin mx-auto text-blue-500" />
-          <p class="text-gray-600 dark:text-gray-300">Loading PR data...</p>
-        </div>
-        <div v-else-if="dataError" class="space-y-2">
-          <UIcon name="i-heroicons-exclamation-triangle" class="w-8 h-8 mx-auto text-red-500" />
-          <p class="text-red-600 dark:text-red-400">{{ dataError }}</p>
-          <UButton @click="fetchPRData" size="sm" color="blue">Retry</UButton>
-        </div>
-      </div>
-    </UCard> -->
-
-    <!-- PR Data Display -->
-    <!-- <UCard v-if="prData && !dataLoading" class="max-w-2xl mx-auto">
-      <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-heroicons-chart-bar" class="w-5 h-5" />
-          <h2 class="text-xl font-semibold">PR Statistics</h2>
-        </div>
-      </template>
-      
-      <div class="space-y-4">
-        <div class="text-sm text-gray-600 dark:text-gray-300">
-          <p>Last updated: {{ prData["updatedAt"] }}</p>
-          <p>Data loaded successfully! {{ prData.data.length }} bytes available.</p>
-        </div>
-        <UButton @click="showDataDetails = !showDataDetails" size="sm" color="gray">
-          {{ showDataDetails ? 'Hide' : 'Show' }} Data Details
-        </UButton>
-        
-        <div v-if="showDataDetails" class="mt-4">
-          <pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-xs overflow-auto max-h-64">{{ JSON.stringify(prData, null, 2) }}</pre>
-        </div>
-      </div>
-    </UCard> -->
-
     <UCard class="max-w-2xl mx-auto">
       <template #header>
         <div class="flex items-center gap-2">
