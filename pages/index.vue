@@ -13,12 +13,13 @@
       <template #header>
         <div class="flex items-center gap-2">
           <UIcon name="i-heroicons-queue-list" class="w-5 h-5" />
-          <h2 class="text-xl font-semibold">When will you apply for permanent residency?</h2>
+          <h2 class="text-xl font-semibold">When do you apply for permanent residency?</h2>
         </div>
       </template>
 
       <div class="space-y-4">
         <USelect
+          class="w-full flex items-center justify-center"
           v-model="appliedYear"
           :items="yearOptions"
           placeholder="Select year"
@@ -82,13 +83,20 @@
           <p v-if="availableDates.includes(appliedDate)" class="text-center text-sm text-gray-600 dark:text-gray-400">
             If you applied in {{new Date(appliedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' } )}}, the remaining applications based on current processing status is approximately:
           </p>
-          <p v-else class="text-center text-sm text-gray-600 dark:text-gray-400">
-            At this time, the official data for your specified date is not yet available.
+          <div v-else>
+            <UAlert
+              color="warning"
+              variant="soft"
+              description="At this time, the official data for your specified date is not yet available."
+              icon="i-heroicons-exclamation-triangle"
+            />
             <br>
-            If you applied in {{new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' } )}}, the remaining applications based on current processing status is approximately:
-          </p>
+            <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+              If you applied in {{new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' } )}}, the remaining applications based on current processing status is approximately:
+            </p>
+          </div>
           <p class="text-center text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {{ remainingCount }}
+            <UIcon name="i-heroicons-users" class="size-4 mx-2" /> {{ remainingCount }}
           </p>  
         </div>
       </UCard>
