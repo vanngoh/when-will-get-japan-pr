@@ -63,6 +63,8 @@
         <div class="space-y-4">
           <p v-if="prData" class="text-center text-sm text-gray-600 dark:text-gray-400">
             データ更新日: {{ new Date(prData.updatedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+            <br>
+            データからの最新日付: {{ new Date(latestAvailableDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }) }}
           </p>
           <UCollapsible>
             <UButton size="sm" color="info" variant="ghost" class="w-full flex items-center justify-center">
@@ -77,8 +79,13 @@
             </template>
           </UCollapsible>
                   
-          <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-            {{ appliedYear }}-{{ appliedMonth }}に申請した場合、現在の処理状況で残っているの件数は約:
+          <p v-if="availableDates.includes(appliedDate)" class="text-center text-sm text-gray-600 dark:text-gray-400">
+            {{new Date(appliedDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' } )}}に申請した場合、現在の処理状況で残っているの件数は約:
+          </p>
+          <p v-else class="text-center text-sm text-gray-600 dark:text-gray-400">
+            現時点では、ご指定の日付の公式データはまだ対応していません。
+            <br>
+            {{new Date(latestAvailableDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' } )}}に申請した場合、現在の処理状況で残っているの件数は約:
           </p>
           <p class="text-center text-2xl font-bold text-blue-600 dark:text-blue-400">
             {{ remainingCount }}
@@ -96,37 +103,16 @@ interface PRData {
   }
 }
 
+// Reactive state
 const appliedYear = ref<number>(new Date().getFullYear())
 const appliedMonth = ref<string>((new Date().getMonth() + 1).toString().padStart(2, '0'))
+const appliedDate = ref<string>(`${appliedYear.value}-${appliedMonth.value}`)
 
-const loading = ref(false)
-const prediction = ref<string | null>(null)
-const prData = ref<PRData | null>(null)
-const remainingCount = ref<string>('0')
-const dataLoading = ref(true)
-const dataError = ref<string | null>(null)
-
-// Fetch PR data from GitHub
-const fetchPRData = async () => {
-  try {
-    dataLoading.value = true
-    dataError.value = null
-    
-    const response = await $fetch('https://raw.githubusercontent.com/vanngoh/estat-jp/main/json/pr.json')
-    prData.value = JSON.parse(response as string) as PRData
-  } catch (error) {
-    console.error('Error fetching PR data:', error)
-    dataError.value = 'Failed to load PR data. Please try again later.'
-  } finally {
-    dataLoading.value = false
-  }
-}
-
-// Generate year options from 2020 to current year
+// Generate year options from 2021 to current year
 const yearOptions = computed(() => {
   const currentYear = new Date().getFullYear()
   const years = []
-  for (let year = currentYear; year >= 2020; year--) {
+  for (let year = currentYear; year >= 2021; year--) {
     years.push({ label: year.toString(), value: year })
   }
   return years
@@ -148,6 +134,44 @@ const monthOptions = computed(() => {
   return months
 })
 
+const loading = ref(false)
+const prediction = ref<string | null>(null)
+const prData = ref<PRData | null>(null)
+const remainingCount = ref<string>('0')
+const dataLoading = ref(true)
+const dataError = ref<string | null>(null)
+
+// Computed properties for better performance
+// const appliedDate = computed(() => `${appliedYear.value}-${appliedMonth.value}`)
+const availableDates = computed(() => {
+  if (!prData.value?.data) return []
+  return Object.keys(prData.value.data).sort()
+})
+const latestAvailableDate = computed(() => {
+  const dates = availableDates.value
+  return dates.length > 0 ? dates[dates.length - 1] : ''
+})
+// const isDateAvailable = computed(() => {
+//   return availableDates.value.includes(appliedDate.value)
+// })
+
+// Fetch PR data from GitHub
+const fetchPRData = async () => {
+  try {
+    dataLoading.value = true
+    dataError.value = null
+    
+    const response = await $fetch('https://raw.githubusercontent.com/vanngoh/estat-jp/main/json/pr.json')
+    prData.value = JSON.parse(response as string) as PRData
+  } catch (error) {
+    console.error('Error fetching PR data:', error)
+    dataError.value = 'Failed to load PR data. Please try again later.'
+  } finally {
+    dataLoading.value = false
+  }
+}
+
+
 const predictPR = async () => {
   if (!appliedYear.value || !appliedMonth.value) {
     return
@@ -162,37 +186,34 @@ const predictPR = async () => {
   
   // Use the loaded PR data for prediction
   if (prData.value) {
-    const appliedDate = `${appliedYear.value}-${appliedMonth.value}`
-    
-    // Get the categories["100000"] value for the applied month
-    const appliedMonthData = prData.value.data[appliedDate]
-    if (!appliedMonthData) {
+    appliedDate.value = `${appliedYear.value}-${appliedMonth.value}`
+    // Check if the applied date is available in the data
+    if (!availableDates.value.includes(appliedDate.value)) {
       prediction.value = `最新データがまだ更新されていません。`
-      let dateKeys = Object.keys(prData.value.data).sort()
-      let latestDate = dateKeys[dateKeys.length - 1]
-      remainingCount.value = parseInt(prData.value.data[latestDate].categories["100000"].value).toLocaleString()
+      const latestData = prData.value.data[latestAvailableDate.value]
+      remainingCount.value = getCategoryValue(latestData, "100000").toLocaleString()
       loading.value = false
       return
     }
     
-    const initialValue = parseInt(appliedMonthData.categories["100000"].value)
+    const appliedMonthData = prData.value.data[appliedDate.value]
+    const initialValue = getCategoryValue(appliedMonthData, "100000")
     
     // Get all months after the applied month
-    const allMonths = Object.keys(prData.value.data).sort()
-    const appliedMonthIndex = allMonths.indexOf(appliedDate)
-    const followingMonths = allMonths.slice(appliedMonthIndex + 1)
+    const appliedMonthIndex = availableDates.value.indexOf(appliedDate.value)
+    const followingMonths = availableDates.value.slice(appliedMonthIndex + 1)
     
     // Sum up all categories["300000"] values from following months
-    let totalProcessed = 0
-    for (const month of followingMonths) {
-      const monthData = prData.value.data[month]
-      if (monthData && monthData.categories["300000"]) {
-        totalProcessed += parseInt(monthData.categories["300000"].value)
-      }
-    }
+    const totalProcessed = followingMonths.reduce((sum, month) => {
+      const monthData = prData.value!.data[month]
+      return sum + getCategoryValue(monthData, "300000")
+    }, 0)
     
     // Calculate remaining applications
-    remainingCount.value = (initialValue - totalProcessed).toLocaleString()
+    const remaining = Math.max(0, initialValue - totalProcessed)
+    
+    prediction.value = `${appliedDate.value}に申請した場合、現在の処理状況では約${remaining.toLocaleString()}件が残っています。`
+    remainingCount.value = remaining.toLocaleString()
   }
   
   loading.value = false
