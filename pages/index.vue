@@ -2,7 +2,7 @@
   <div class="my-8 space-y-8">
     <div class="text-center">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-        🇯🇵 永住権獲得予測
+        🇯🇵 Permanent Residency Prediction
       </h1>
       <p class="text-sm text-gray-600 dark:text-gray-300 mb-8">
         A tool which predicts when you can get Japanese Permanent Residency on your application date.
@@ -13,7 +13,7 @@
       <template #header>
         <div class="flex items-center gap-2">
           <UIcon name="i-heroicons-queue-list" class="w-5 h-5" />
-          <h2 class="text-xl font-semibold">いつ永住権を申請しますか？</h2>
+          <h2 class="text-xl font-semibold">When will you apply for permanent residency?</h2>
         </div>
       </template>
 
@@ -48,7 +48,7 @@
           size="lg"
           class="w-full flex items-center justify-center"
         >
-          予測する
+          Predict
         </UButton>
       </div>
     </UCard>
@@ -57,18 +57,18 @@
         <template #header>
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-arrow-trending-up" class="w-5 h-5" />
-            <h2 class="text-xl font-semibold">予測結果</h2>
+            <h2 class="text-xl font-semibold">Prediction Result</h2>
           </div>
         </template> 
         <div class="space-y-4">
           <p v-if="prData" class="text-center text-sm text-gray-600 dark:text-gray-400">
-            データ更新日: {{ new Date(prData.updatedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+            Data updated: {{ new Date(prData.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
             <br>
-            データからの最新日付: {{ new Date(latestAvailableDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+            Latest available date from data: {{ new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
           </p>
           <UCollapsible>
             <UButton size="sm" color="info" variant="ghost" class="w-full flex items-center justify-center">
-              生データを見る
+              View Raw Data
             </UButton>
             <template #content>
               <div class="mt-4">
@@ -80,12 +80,12 @@
           </UCollapsible>
                   
           <p v-if="availableDates.includes(appliedDate)" class="text-center text-sm text-gray-600 dark:text-gray-400">
-            {{new Date(appliedDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' } )}}に申請した場合、現在の処理状況で残っているの件数は約:
+            If you applied in {{new Date(appliedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' } )}}, the remaining applications based on current processing status is approximately:
           </p>
           <p v-else class="text-center text-sm text-gray-600 dark:text-gray-400">
-            現時点では、ご指定の日付の公式データはまだ対応していません。
+            At this time, the official data for your specified date is not yet available.
             <br>
-            {{new Date(latestAvailableDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' } )}}に申請した場合、現在の処理状況で残っているの件数は約:
+            If you applied in {{new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' } )}}, the remaining applications based on current processing status is approximately:
           </p>
           <p class="text-center text-2xl font-bold text-blue-600 dark:text-blue-400">
             {{ remainingCount }}
@@ -189,7 +189,7 @@ const predictPR = async () => {
     appliedDate.value = `${appliedYear.value}-${appliedMonth.value}`
     // Check if the applied date is available in the data
     if (!availableDates.value.includes(appliedDate.value)) {
-      prediction.value = `最新データがまだ更新されていません。`
+      prediction.value = `Latest data has not been updated yet.`
       const latestData = prData.value.data[latestAvailableDate.value]
       remainingCount.value = getCategoryValue(latestData, "100000").toLocaleString()
       loading.value = false
@@ -212,7 +212,7 @@ const predictPR = async () => {
     // Calculate remaining applications
     const remaining = Math.max(0, initialValue - totalProcessed)
     
-    prediction.value = `${appliedDate.value}に申請した場合、現在の処理状況では約${remaining.toLocaleString()}件が残っています。`
+    prediction.value = `If you applied in ${appliedDate.value}, approximately ${remaining.toLocaleString()} applications remain based on current processing status.`
     remainingCount.value = remaining.toLocaleString()
   }
   
