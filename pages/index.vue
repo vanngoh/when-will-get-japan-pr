@@ -54,7 +54,7 @@
       </div>
     </UCard>
 
-    <UCard v-if="prediction" class="max-w-2xl mx-auto">       
+    <UCard v-if="predictionResult.earliestDate !== 'N/A'" class="max-w-2xl mx-auto">       
         <template #header>
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-arrow-trending-up" class="w-5 h-5" />
@@ -81,48 +81,55 @@
           </UCollapsible>
                   
           <p v-if="availableDates.includes(appliedDate)" class="text-center text-sm text-gray-600 dark:text-gray-400">
-            If you applied in {{new Date(appliedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' } )}}, the remaining applications based on current processing status is approximately:
+            If you applied in {{new Date(appliedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' } )}}, here's your prediction:
           </p>
           <div v-else>
             <UAlert
               color="warning"
               variant="soft"
-              description="At this time, the official data for your specified date is not yet available."
+              description="At this time, the official data for your specified date is not yet available. Using latest available data for estimation."
               icon="i-heroicons-exclamation-triangle"
             />
             <br>
             <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-              If you applied in {{new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' } )}}, the current processing status is approximately:
+              Using data from {{new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' } )}} for estimation:
             </p>
           </div>
           
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="flex font-bold items-center justify-center text-blue-600 dark:text-blue-400 space-x-2 border-2 border-blue-600 dark:border-blue-400 rounded-lg p-4">
               <UIcon name="i-heroicons-users" class="size-6" /> 
               <div class="space-x-2">
-                <span class="text-2xl">{{ remainingCount }}</span> 
+                <span class="text-2xl">{{ predictionResult.remainingCount }}</span> 
                 <span class="text-sm">in queue</span>
               </div>
             </div>
             <div class="flex font-bold items-center justify-center text-green-600 dark:text-green-400 space-x-2 border-2 border-green-600 dark:border-green-400 rounded-lg p-4">
               <UIcon name="i-heroicons-document-check" class="size-6" /> 
               <div class="space-x-2">
-                <span class="text-2xl">{{ averageMonthlyProcessed.toLocaleString() }}</span> 
+                <span class="text-2xl">{{ predictionResult.averageMonthlyProcessed.toLocaleString() }}</span> 
                 <span class="text-sm">monthly solved</span>
               </div>
             </div>
             <div class="flex font-bold items-center justify-center text-rose-600 dark:text-rose-400 space-x-2 border-2 border-rose-600 dark:border-rose-400 rounded-lg p-4">
               <UIcon name="i-heroicons-inbox-arrow-down" class="size-6" /> 
               <div class="space-x-2">
-                <span class="text-2xl">{{ averageMonthlyNewApplication.toLocaleString() }}</span> 
+                <span class="text-2xl">{{ predictionResult.averageMonthlyNewApplication.toLocaleString() }}</span> 
                 <span class="text-sm">monthly new</span>
               </div>
             </div>
             <div class="flex font-bold items-center justify-center text-amber-600 dark:text-amber-400 space-x-2 border-2 border-amber-600 dark:border-amber-400 rounded-lg p-4">
               <UIcon name="i-heroicons-clock" class="size-6" /> 
               <div class="space-x-2">
-                <span class="text-2xl">10~18</span> 
-                <span class="text-sm">months to solve</span>
+                <span class="text-2xl">{{ predictionResult.earliestDate !== 'N/A' ? predictionResult.earliestDate : 'N/A' }}</span> 
+                <span class="text-sm">earliest</span>
+              </div>
+            </div>
+            <div class="flex font-bold items-center justify-center text-purple-600 dark:text-purple-400 space-x-2 border-2 border-purple-600 dark:border-purple-400 rounded-lg p-4">
+              <UIcon name="i-heroicons-calendar" class="size-6" /> 
+              <div class="space-x-2">
+                <span class="text-2xl">{{ predictionResult.latestDate !== 'N/A' ? predictionResult.latestDate : 'N/A' }}</span> 
+                <span class="text-sm">latest</span>
               </div>
             </div>
           </div>
@@ -137,6 +144,15 @@ interface PRData {
   data: {
     [key: string]: any
   }
+}
+
+interface PredictionResult {
+  earliestDate: string
+  latestDate: string
+  remainingCount: string
+  averageMonthlyProcessed: number
+  averageMonthlyNewApplication: number
+  monthsToSolve: number
 }
 
 // Reactive state
@@ -171,11 +187,15 @@ const monthOptions = computed(() => {
 })
 
 const loading = ref(false)
-const prediction = ref<string | null>(null)
+const predictionResult = ref<PredictionResult>({
+  earliestDate: 'N/A',
+  latestDate: 'N/A',
+  remainingCount: '0',
+  averageMonthlyProcessed: 0,
+  averageMonthlyNewApplication: 0,
+  monthsToSolve: 0
+})
 const prData = ref<PRData | null>(null)
-const averageMonthlyProcessed = ref<number>(0)
-const averageMonthlyNewApplication = ref<number>(0)
-const remainingCount = ref<string>('0')
 const dataLoading = ref(true)
 const dataError = ref<string | null>(null)
 
@@ -223,21 +243,15 @@ const predictPR = async () => {
   if (prData.value) {
     appliedDate.value = `${appliedYear.value}-${appliedMonth.value}`
 
-    averageMonthlyProcessed.value = getAverageMonthlyProcessed(prData.value)
-    averageMonthlyNewApplication.value = getAverageMonthlyNewApplication(prData.value)
-
-    // Check if the applied date is available in the data
-    if (!availableDates.value.includes(appliedDate.value)) {
-      prediction.value = `Latest data has not been updated yet.`
-      const latestData = prData.value.data[latestAvailableDate.value]
-      remainingCount.value = getCategoryValue(latestData, "100000").toLocaleString()
-      loading.value = false
-      return
-    }
+    // Get estimation using the new getEstimation function
+    const estimation = getEstimation(prData.value, appliedDate.value)
     
-    // Calculate remaining applications using utility function
-    const remaining = getRemainingApplications(prData.value, appliedDate.value)
-    remainingCount.value = remaining.toLocaleString()
+    // Update prediction result with estimation data
+    predictionResult.value.earliestDate = estimation.earliest
+    predictionResult.value.latestDate = estimation.latest
+    predictionResult.value.remainingCount = estimation.remaining
+    predictionResult.value.averageMonthlyProcessed = estimation.averageMonthlyProcessed
+    predictionResult.value.averageMonthlyNewApplication = getAverageMonthlyNewApplication(prData.value)
   }
   
   loading.value = false
