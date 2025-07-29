@@ -82,6 +82,8 @@
                   
           <p v-if="availableDates.includes(appliedDate)" class="text-center text-sm text-gray-600 dark:text-gray-400">
             If you applied in {{new Date(appliedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' } )}}, here's your prediction:
+            <br>
+            <span v-if="predictionResult.remainingCount === '0'" class="text-green-600 dark:text-green-400 font-semibold"> (Your application has likely been processed!)</span>
           </p>
           <div v-else>
             <UAlert
@@ -157,7 +159,7 @@ interface PredictionResult {
 
 // Reactive state
 const appliedYear = ref<number>(new Date().getFullYear())
-const appliedMonth = ref<string>((new Date().getMonth() + 1).toString().padStart(2, '0'))
+const appliedMonth = ref<string>(formatDate(new Date()).split('-')[1])
 const appliedDate = ref<string>(`${appliedYear.value}-${appliedMonth.value}`)
 
 // Generate year options from 2021 to current year
