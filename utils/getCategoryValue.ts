@@ -1,5 +1,3 @@
-import { safeParseInt } from './safeParseInt'
-
 /**
  * Safely get a category value from month data
  * @param monthData - The month data object containing categories

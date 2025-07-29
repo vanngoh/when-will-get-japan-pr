@@ -1,5 +1,3 @@
-import { getCategoryValue } from './getCategoryValue'
-
 /**
  * Calculate remaining applications for a given applied date
  * @param prData - The PR data object containing monthly data

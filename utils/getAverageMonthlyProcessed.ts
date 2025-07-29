@@ -1,5 +1,3 @@
-import { getCategoryValue } from './getCategoryValue'
-
 /**
  * Calculate the average monthly processed applications from the past 15 months
  * @param prData - The PR data object containing monthly data
