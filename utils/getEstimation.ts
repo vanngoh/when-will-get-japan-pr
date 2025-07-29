@@ -60,7 +60,7 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
   // Step 3: If the latest date in available data is older than today's month, 
   // continuously minus the averageMonthlyProcessed for the months in between
   const today = new Date()
-  const currentYearMonth = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`
+  const currentYearMonth = formatDate(today)
   
   if (latestAvailableDate < currentYearMonth) {
     
@@ -76,9 +76,6 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
     remaining -= (averageMonthlyProcessed * monthsDiff)
   }
 
-  // Ensure remaining is not negative
-  remaining = Math.max(0, remaining)
-
   // Step 6: Estimate the earliest & latest year month (YYYY-MM) based on remaining applications and new applications
   if (averageMonthlyProcessed <= 0) {
     return {
@@ -89,6 +86,55 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
     }
   }
 
+  const currentDate = new Date()
+  
+  // Check if remaining applications is <= 0 (already processed or exactly processed)
+  if (remaining <= 0) {
+    if (remaining < 0) {
+      // Calculate how many months ago the application was processed
+      const monthsProcessedAgo = Math.ceil(Math.abs(remaining) / averageMonthlyProcessed)
+      
+      // Calculate the date when the application was processed
+      const processedDate = new Date(currentDate)
+      processedDate.setMonth(processedDate.getMonth() - monthsProcessedAgo)
+      
+      // Calculate months needed to process the new applications
+      const monthsToProcessNew = Math.ceil(newApplications / averageMonthlyProcessed)
+      
+      // Earliest date: when the application was processed
+      const earliestDate = new Date(processedDate)
+      // Latest date: processed date + time to process new applications
+      const latestDate = new Date(processedDate)
+      latestDate.setMonth(latestDate.getMonth() + monthsToProcessNew)
+      
+      return {
+        remaining: '0', // Show as 0 since it's already processed
+        earliest: formatDate(earliestDate),
+        latest: formatDate(latestDate),
+        averageMonthlyProcessed: averageMonthlyProcessed
+      }
+    } else {
+      // remaining === 0 (exactly processed)
+      // Calculate months needed to process the new applications
+      const monthsToProcessNew = Math.ceil(newApplications / averageMonthlyProcessed)
+      
+      // If user applied in this month, they could be processed immediately or within the month
+      const earliestDate = new Date(currentDate)
+      const latestDate = new Date(currentDate)
+      latestDate.setMonth(latestDate.getMonth() + monthsToProcessNew)
+      
+      return {
+        remaining: remaining.toLocaleString(),
+        earliest: formatDate(earliestDate),
+        latest: formatDate(latestDate),
+        averageMonthlyProcessed: averageMonthlyProcessed
+      }
+    }
+  }
+
+  // Ensure remaining is not negative for future calculations
+  remaining = Math.max(0, remaining)
+
   // Calculate months needed to process the remaining applications
   const monthsToProcessRemaining = Math.ceil(remaining / averageMonthlyProcessed)
   
@@ -96,17 +142,12 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
   const monthsToProcessNew = Math.ceil(newApplications / averageMonthlyProcessed)
   
   // Calculate earliest date: when remaining applications will be processed (from current date)
-  const currentDate = new Date()
   const earliestDate = new Date(currentDate)
   earliestDate.setMonth(earliestDate.getMonth() + monthsToProcessRemaining)
   
   // Calculate latest date: add the time needed to process new applications + 1 month safety margin
   const latestDate = new Date(currentDate)
   latestDate.setMonth(latestDate.getMonth() + monthsToProcessRemaining + monthsToProcessNew + 1)
-
-  const formatDate = (date: Date): string => {
-    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`
-  }
 
   return {
     remaining: remaining.toLocaleString(),
