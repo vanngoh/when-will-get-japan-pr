@@ -2,7 +2,7 @@
   <div class="my-8 space-y-8">
     <div class="text-center">
       <div class="flex items-center justify-between max-w-2xl px-4 mx-auto mb-4">
-        
+        <ThemeSwitcher />
         <LanguageSwitcher />
       </div>
       
