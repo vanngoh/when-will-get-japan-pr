@@ -17,6 +17,9 @@
   "monthlyNew": "每月新增",
   "earliest": "最早",
   "latest": "最晚",
+  "toggleTheme": "切換主題",
+  "light": "明亮",
+  "dark": "夜間",
   "months": {
     "jan": "一月",
     "feb": "二月",

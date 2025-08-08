@@ -104,38 +104,38 @@
           </div>
           
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="flex font-bold items-center justify-center text-blue-600 dark:text-blue-400 space-x-2 border-2 border-blue-600 dark:border-blue-400 rounded-lg p-4">
-              <UIcon name="i-heroicons-users" class="size-6" /> 
+            <div class="flex font-bold items-center justify-center text-blue-500 dark:text-blue-400 space-x-2 border-2 border-blue-500 dark:border-blue-400 rounded-lg p-4">
+              <UIcon name="i-lucide-users" class="size-6" /> 
               <div class="space-x-2">
                 <span class="text-2xl">{{ predictionResult.remainingCount }}</span> 
                 <span class="text-sm">{{ $t('inQueue') }}</span>
               </div>
             </div>
             <div class="flex font-bold items-center justify-center text-green-600 dark:text-green-400 space-x-2 border-2 border-green-600 dark:border-green-400 rounded-lg p-4">
-              <UIcon name="i-heroicons-document-check" class="size-6" /> 
+              <UIcon name="i-lucide-shredder" class="size-6" /> 
               <div class="space-x-2">
                 <span class="text-2xl">{{ predictionResult.averageMonthlyProcessed.toLocaleString() }}</span> 
                 <span class="text-sm">{{ $t('monthlySolved') }}</span>
               </div>
             </div>
-            <div class="flex font-bold items-center justify-center text-rose-600 dark:text-rose-400 space-x-2 border-2 border-rose-600 dark:border-rose-400 rounded-lg p-4">
-              <UIcon name="i-heroicons-inbox-arrow-down" class="size-6" /> 
+            <div class="flex font-bold items-center justify-center text-rose-500 dark:text-rose-400 space-x-2 border-2 border-rose-500 dark:border-rose-400 rounded-lg p-4">
+              <UIcon name="i-lucide-package-plus" class="size-6" /> 
               <div class="space-x-2">
                 <span class="text-2xl">{{ predictionResult.averageMonthlyNewApplication.toLocaleString() }}</span> 
                 <span class="text-sm">{{ $t('monthlyNew') }}</span>
               </div>
             </div>
-            <div class="flex font-bold items-center justify-center text-amber-600 dark:text-amber-400 space-x-2 border-2 border-amber-600 dark:border-amber-400 rounded-lg p-4">
-              <UIcon name="i-heroicons-clock" class="size-6" /> 
+            <div class="flex font-bold items-center justify-center text-amber-500 dark:text-amber-400 space-x-2 border-2 border-amber-500 dark:border-amber-400 rounded-lg p-4">
+              <UIcon name="i-lucide-rabbit" class="size-6" /> 
               <div class="space-x-2">
-                <span class="text-2xl">{{ predictionResult.earliestDate !== 'N/A' ? predictionResult.earliestDate : 'N/A' }}</span> 
+                <span class="text-xl">{{ predictionResult.earliestDate !== 'N/A' ? predictionResult.earliestDate : 'N/A' }}</span> 
                 <span class="text-sm">{{ $t('earliest') }}</span>
               </div>
             </div>
-            <div class="flex font-bold items-center justify-center text-purple-600 dark:text-purple-400 space-x-2 border-2 border-purple-600 dark:border-purple-400 rounded-lg p-4">
-              <UIcon name="i-heroicons-calendar" class="size-6" /> 
+            <div class="flex font-bold items-center justify-center text-purple-500 dark:text-purple-400 space-x-2 border-2 border-purple-500 dark:border-purple-400 rounded-lg p-4">
+              <UIcon name="i-lucide-turtle" class="size-6" /> 
               <div class="space-x-2">
-                <span class="text-2xl">{{ predictionResult.latestDate !== 'N/A' ? predictionResult.latestDate : 'N/A' }}</span> 
+                <span class="text-xl">{{ predictionResult.latestDate !== 'N/A' ? predictionResult.latestDate : 'N/A' }}</span> 
                 <span class="text-sm">{{ $t('latest') }}</span>
               </div>
             </div>
@@ -166,7 +166,7 @@ interface PredictionResult {
 const { locale } = useI18n()
 
 useHead({
-  title: () => `🇯🇵 ${$t('title')}`,
+  title: () => `${$t('title')}`,
   meta: [
     { name: 'description', content: () => $t('description') },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },
@@ -174,7 +174,7 @@ useHead({
     { name: 'mobile-web-app-capable', content: 'yes' },
     { name: 'apple-mobile-web-app-capable', content: 'yes' },
     { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
-    { property: 'og:title', content: () => `🇯🇵 ${$t('title')}` },
+    { property: 'og:title', content: () => `${$t('title')}` },
     { property: 'og:description', content: () => $t('description') },
     { property: 'og:type', content: 'website' },
     { property: 'og:locale', content: () => locale.value },

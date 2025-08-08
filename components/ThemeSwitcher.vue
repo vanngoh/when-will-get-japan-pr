@@ -7,6 +7,7 @@
       variant="ghost"
       size="sm"
       :aria-label="$t('toggleTheme')"
+      :label="$t(currentThemeLabel)"
       @click="toggleTheme"
     />
   </div>
@@ -14,34 +15,14 @@
 
 <script setup lang="ts">
 const colorMode = useColorMode()
-const { t } = useI18n()
-
-const themeOptions = computed(() => [
-  {
-    label: t('light'),
-    icon: 'i-heroicons-sun',
-    click: () => {
-      colorMode.preference = 'light'
-    }
-  },
-  {
-    label: t('dark'),
-    icon: 'i-heroicons-moon',
-    click: () => {
-      colorMode.preference = 'dark'
-    }
-  }
-])
 
 const currentThemeIcon = computed(() => {
-  switch (colorMode.preference) {
-    case 'light':
-      return 'i-heroicons-sun'
-    case 'dark':
-      return 'i-heroicons-moon'
-    default:
-      return 'i-heroicons-sun'
-  }
+  // Shows what you'll get when you click
+  return colorMode.preference === 'light' ? 'i-lucide-moon' : 'i-lucide-sun'
+})
+
+const currentThemeLabel = computed(() => {
+  return colorMode.preference === 'light' ? 'dark' : 'light'
 })
 
 const toggleTheme = () => {
