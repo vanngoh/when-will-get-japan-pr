@@ -17,6 +17,9 @@
   "monthlyNew": "monthly new",
   "earliest": "earliest",
   "latest": "latest",
+  "toggleTheme": "Toggle theme",
+  "light": "Light",
+  "dark": "Dark",
   "months": {
     "jan": "Jan",
     "feb": "Feb",
