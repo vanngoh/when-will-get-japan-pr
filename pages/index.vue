@@ -1,11 +1,16 @@
 <template>
   <div class="my-8 space-y-8">
     <div class="text-center">
-      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-        🇯🇵 Permanent Residency Prediction
+      <div class="flex items-center justify-between max-w-2xl px-4 mx-auto mb-4">
+        
+        <LanguageSwitcher />
+      </div>
+      
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
+        {{ $t('title') }}
       </h1>
       <p class="text-sm text-gray-600 dark:text-gray-300 mb-8">
-        A tool which predicts when you can get Japanese Permanent Residency on your application date.
+        {{ $t('description') }}
       </p>
     </div>
 
@@ -13,7 +18,7 @@
       <template #header>
         <div class="flex items-center gap-2">
           <UIcon name="i-heroicons-queue-list" class="w-5 h-5" />
-          <h2 class="text-xl font-semibold">When do you apply for permanent residency?</h2>
+          <h2 class="text-xl font-semibold">{{ $t('whenApply') }}</h2>
         </div>
       </template>
 
@@ -22,7 +27,7 @@
           class="w-full flex items-center justify-center"
           v-model="appliedYear"
           :items="yearOptions"
-          placeholder="Select year"
+          :placeholder="$t('selectYear')"
           color="info"
           highlight
         />
@@ -49,7 +54,7 @@
           size="lg"
           class="w-full flex items-center justify-center"
         >
-          Predict
+          {{ $t('predict') }}
         </UButton>
       </div>
     </UCard>
@@ -58,18 +63,18 @@
         <template #header>
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-arrow-trending-up" class="w-5 h-5" />
-            <h2 class="text-xl font-semibold">Prediction Result</h2>
+            <h2 class="text-xl font-semibold">{{ $t('predictionResult') }}</h2>
           </div>
         </template> 
         <div class="space-y-4">
           <p v-if="prData" class="text-center text-sm text-gray-600 dark:text-gray-400">
-            Data updated: {{ new Date(prData.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+            {{ $t('dataUpdated', { date: new Date(prData.updatedAt).toLocaleDateString($i18n.locale, { year: 'numeric', month: 'long', day: 'numeric' }) }) }}
             <br>
-            Latest available date from data: {{ new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+            {{ $t('latestAvailableDate', { date: new Date(latestAvailableDate).toLocaleDateString($i18n.locale, { year: 'numeric', month: 'long', day: 'numeric' }) }) }}
           </p>
           <UCollapsible>
             <UButton size="sm" color="info" variant="ghost" class="w-full flex items-center justify-center">
-              View Raw Data
+              {{ $t('viewRawData') }}
             </UButton>
             <template #content>
               <div class="mt-4">
@@ -81,20 +86,20 @@
           </UCollapsible>
                   
           <p v-if="availableDates.includes(appliedDate)" class="text-center text-sm text-gray-600 dark:text-gray-400">
-            If you applied in {{new Date(appliedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' } )}}, here's your prediction:
+            {{ $t('ifAppliedIn', { date: new Date(appliedDate).toLocaleDateString($i18n.locale, { year: 'numeric', month: 'short' }) }) }}
             <br>
-            <span v-if="predictionResult.remainingCount === '0'" class="text-green-600 dark:text-green-400 font-semibold"> (Your application has likely been processed!)</span>
+            <span v-if="predictionResult.remainingCount === '0'" class="text-green-600 dark:text-green-400 font-semibold"> {{ $t('applicationProcessed') }}</span>
           </p>
           <div v-else>
             <UAlert
               color="warning"
               variant="soft"
-              description="At this time, the official data for your specified date is not yet available. Using latest available data for estimation."
+              :description="$t('dataNotAvailable')"
               icon="i-heroicons-exclamation-triangle"
             />
             <br>
             <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-              Using data from {{new Date(latestAvailableDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' } )}} for estimation:
+              {{ $t('usingDataFrom', { date: new Date(latestAvailableDate).toLocaleDateString($i18n.locale, { year: 'numeric', month: 'short' }) }) }}
             </p>
           </div>
           
@@ -103,35 +108,35 @@
               <UIcon name="i-heroicons-users" class="size-6" /> 
               <div class="space-x-2">
                 <span class="text-2xl">{{ predictionResult.remainingCount }}</span> 
-                <span class="text-sm">in queue</span>
+                <span class="text-sm">{{ $t('inQueue') }}</span>
               </div>
             </div>
             <div class="flex font-bold items-center justify-center text-green-600 dark:text-green-400 space-x-2 border-2 border-green-600 dark:border-green-400 rounded-lg p-4">
               <UIcon name="i-heroicons-document-check" class="size-6" /> 
               <div class="space-x-2">
                 <span class="text-2xl">{{ predictionResult.averageMonthlyProcessed.toLocaleString() }}</span> 
-                <span class="text-sm">monthly solved</span>
+                <span class="text-sm">{{ $t('monthlySolved') }}</span>
               </div>
             </div>
             <div class="flex font-bold items-center justify-center text-rose-600 dark:text-rose-400 space-x-2 border-2 border-rose-600 dark:border-rose-400 rounded-lg p-4">
               <UIcon name="i-heroicons-inbox-arrow-down" class="size-6" /> 
               <div class="space-x-2">
                 <span class="text-2xl">{{ predictionResult.averageMonthlyNewApplication.toLocaleString() }}</span> 
-                <span class="text-sm">monthly new</span>
+                <span class="text-sm">{{ $t('monthlyNew') }}</span>
               </div>
             </div>
             <div class="flex font-bold items-center justify-center text-amber-600 dark:text-amber-400 space-x-2 border-2 border-amber-600 dark:border-amber-400 rounded-lg p-4">
               <UIcon name="i-heroicons-clock" class="size-6" /> 
               <div class="space-x-2">
                 <span class="text-2xl">{{ predictionResult.earliestDate !== 'N/A' ? predictionResult.earliestDate : 'N/A' }}</span> 
-                <span class="text-sm">earliest</span>
+                <span class="text-sm">{{ $t('earliest') }}</span>
               </div>
             </div>
             <div class="flex font-bold items-center justify-center text-purple-600 dark:text-purple-400 space-x-2 border-2 border-purple-600 dark:border-purple-400 rounded-lg p-4">
               <UIcon name="i-heroicons-calendar" class="size-6" /> 
               <div class="space-x-2">
                 <span class="text-2xl">{{ predictionResult.latestDate !== 'N/A' ? predictionResult.latestDate : 'N/A' }}</span> 
-                <span class="text-sm">latest</span>
+                <span class="text-sm">{{ $t('latest') }}</span>
               </div>
             </div>
           </div>
@@ -157,6 +162,31 @@ interface PredictionResult {
   monthsToSolve: number
 }
 
+// Dynamic meta tags with i18n support
+const { locale } = useI18n()
+
+useHead({
+  title: () => `🇯🇵 ${$t('title')}`,
+  meta: [
+    { name: 'description', content: () => $t('description') },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },
+    { name: 'format-detection', content: 'telephone=no' },
+    { name: 'mobile-web-app-capable', content: 'yes' },
+    { name: 'apple-mobile-web-app-capable', content: 'yes' },
+    { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
+    { property: 'og:title', content: () => `🇯🇵 ${$t('title')}` },
+    { property: 'og:description', content: () => $t('description') },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:locale', content: () => locale.value },
+    { property: 'og:locale:alternate', content: 'en-US' },
+    { property: 'og:locale:alternate', content: 'zh-TW' },
+    { property: 'og:locale:alternate', content: 'zh-CN' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: () => `${$t('title')}` },
+    { name: 'twitter:description', content: () => $t('description') }
+  ]
+})
+
 // Reactive state
 const appliedYear = ref<number>(new Date().getFullYear())
 const appliedMonth = ref<string>(formatDate(new Date()).split('-')[1])
@@ -174,14 +204,14 @@ const yearOptions = computed(() => {
 
 // Generate month options with month names
 const monthOptions = computed(() => {
-  const monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  const monthKeys = [
+    'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+    'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
   ]
   const months = []
   for (let month = 1; month <= 12; month++) {
     months.push({ 
-      label: monthNames[month - 1], 
+      label: $t(`months.${monthKeys[month - 1]}`), 
       value: month.toString().padStart(2, '0')
     })
   }
