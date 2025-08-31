@@ -11,7 +11,7 @@
   "ifAppliedIn": "If you applied in {date}, here's your prediction:",
   "applicationProcessed": "(Your application has likely been processed!)",
   "dataNotAvailable": "At this time, the official data for your specified date is not yet available. Using latest available data for estimation.",
-  "usingDataFrom": "Using data from {date} for estimation:",
+  "usingDataUpTo": "Using data up to {date} for estimation:",
   "inQueue": "in queue",
   "monthlySolved": "monthly solved",
   "monthlyNew": "monthly new",
