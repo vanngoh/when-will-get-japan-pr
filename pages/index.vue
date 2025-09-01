@@ -99,7 +99,7 @@
             />
             <br>
             <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-              {{ $t('usingDataFrom', { date: new Date(latestAvailableDate).toLocaleDateString($i18n.locale, { year: 'numeric', month: 'short' }) }) }}
+              {{ $t('usingDataUpTo', { date: new Date(latestAvailableDate).toLocaleDateString($i18n.locale, { year: 'numeric', month: 'short' }) }) }}
             </p>
           </div>
           
@@ -192,11 +192,11 @@ const appliedYear = ref<number>(new Date().getFullYear())
 const appliedMonth = ref<string>(formatDate(new Date()).split('-')[1])
 const appliedDate = ref<string>(`${appliedYear.value}-${appliedMonth.value}`)
 
-// Generate year options from 2021 to current year
+// Generate year options from 2021 to current year + 1 (allow future planning)
 const yearOptions = computed(() => {
   const currentYear = new Date().getFullYear()
   const years = []
-  for (let year = currentYear; year >= 2021; year--) {
+  for (let year = currentYear + 1; year >= 2021; year--) {
     years.push({ label: year.toString(), value: year })
   }
   return years

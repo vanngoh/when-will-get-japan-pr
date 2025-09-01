@@ -11,7 +11,7 @@
   "ifAppliedIn": "如果您在 {date} 申請，以下是您的預測：",
   "applicationProcessed": "（您的申請可能已經處理完成！）",
   "dataNotAvailable": "目前，您指定日期的官方資料尚未提供。使用最新可用資料進行估算。",
-  "usingDataFrom": "使用 {date} 的資料進行估算：",
+  "usingDataUpTo": "使用到 {date} 為止的資料進行估算：",
   "inQueue": "排隊中",
   "monthlySolved": "每月處理",
   "monthlyNew": "每月新增",
