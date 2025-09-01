@@ -1,3 +1,5 @@
+import { getCategoryValue } from './getCategoryValue'
+
 /**
  * Calculate the average monthly new applications from the past 15 months
  * @param prData - The PR data object containing monthly data
