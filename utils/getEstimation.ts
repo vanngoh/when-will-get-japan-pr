@@ -40,8 +40,6 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
   
   // Start from the applied date if available in data, otherwise use the latest available date
   const startFromDate = availableDates.includes(appliedDate) ? appliedDate : latestAvailableDate
-
-  console.log('startFromDate', startFromDate)
   
   // Step 1: Calculate the remaining based on the applied date
   const monthData = prData.data[startFromDate]
