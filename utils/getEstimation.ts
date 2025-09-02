@@ -46,10 +46,6 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
   // Step 1: Calculate the remaining based on the applied date
   const monthData = prData.data[startFromDate]
   let remaining = getCategoryValue(monthData, "100000")  // the value of "100000" (total existing applications)
-  let newApplications = getCategoryValue(monthData, "103000")  // the value of "103000" (new applications)
-
-  // Calculate net monthly change (new applications - processed applications + adjustment)
-  const estimatedNetMonthlyChange = averageMonthlyNewApplication - averageMonthlyProcessed + averageMonthlyAdjustment
 
   // If the applied date is beyond the latest available date, calculate the remaining based on 
   // the following formula until today:
@@ -62,10 +58,11 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
                      (appliedDateObj.getMonth() - latestDate.getMonth())
     
     // Add estimated net change for the months beyond available data
+
+    // Calculate net monthly change (new applications - processed applications + adjustment)
+    const estimatedNetMonthlyChange = averageMonthlyNewApplication - averageMonthlyProcessed + averageMonthlyAdjustment
     const estimatedNetChange = estimatedNetMonthlyChange * monthDiff
     remaining += estimatedNetChange
-    // Update newApplications to use the estimated value for future calculations
-    newApplications = averageMonthlyNewApplication * monthDiff
   }
 
   // Step 2: Minus the total processed of the following months based on real data
@@ -104,9 +101,6 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
   // until remaining <= 0, using average monthly processed and adjustment values
   let yearMonthCursor = latestAvailableDate
   let remainingCursor = remaining
-
-  console.log('remainingCursor', remainingCursor)
-  console.log('yearMonthCursor', yearMonthCursor)
 
   while (remainingCursor > 0) {
     // Increase ONE month based on the startFromDate in YYYY-MM format
