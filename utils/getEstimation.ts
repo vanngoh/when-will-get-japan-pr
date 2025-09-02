@@ -1,6 +1,7 @@
 import { getCategoryValue } from './getCategoryValue'
 import { getAverageMonthlyProcessed } from './getAverageMonthlyProcessed'
 import { getAverageMonthlyNewApplication } from './getAverageMonthlyNewApplication'
+import { getAverageMonthlyAdjustment } from './getAverageMonthlyAdjustment'
 import { formatDate } from './formatDate'
 
 interface EstimationResult {
@@ -28,6 +29,7 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
 
   const averageMonthlyProcessed = getAverageMonthlyProcessed(prData)
   const averageMonthlyNewApplication = getAverageMonthlyNewApplication(prData)
+  const averageMonthlyAdjustment = getAverageMonthlyAdjustment(prData)
 
   // Get all available dates sorted
   const availableDates = Object.keys(prData.data).sort()
@@ -36,34 +38,18 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
   // Check if appliedDate is beyond latestAvailableDate
   const isAppliedDateBeyondData = appliedDate > latestAvailableDate
   
-  // Use the applied date if available in data, otherwise use the latest available date
-  const effectiveDate = availableDates.includes(appliedDate) ? appliedDate : latestAvailableDate
-  
-  if (!effectiveDate) {
-    return {
-      remaining: '0',
-      earliest: 'N/A',
-      latest: 'N/A',
-      averageMonthlyProcessed: 0
-    }
-  }
+  // Start from the applied date if available in data, otherwise use the latest available date
+  const startFromDate = availableDates.includes(appliedDate) ? appliedDate : latestAvailableDate
 
-  // Step 1: Get the value of "100000" (total existing applications) for the effective date
-  const monthData = prData.data[effectiveDate]
+  console.log('startFromDate', startFromDate)
+  
+  // Step 1: Calculate the remaining based on the applied date
+  const monthData = prData.data[startFromDate]
   let remaining = getCategoryValue(monthData, "100000")  // the value of "100000" (total existing applications)
-  let newApplications = getCategoryValue(monthData, "103000")  // the value of "103000" (new applications)
 
-  // Step 2: Minus the total processed of the following months if there are any
-  const effectiveDateIndex = availableDates.indexOf(effectiveDate)
-  const followingDates = availableDates.slice(effectiveDateIndex + 1)
-  
-  for (const date of followingDates) {
-    const processedData = prData.data[date]
-    const processed = getCategoryValue(processedData, "300000")
-    remaining -= processed
-  }
-
-  // Step 3: If appliedDate is beyond latestAvailableDate, add estimated net increment
+  // If the applied date is beyond the latest available date, calculate the remaining based on 
+  // the following formula until today:
+  // remaining = averageMonthlyNewApplications - averageMonthlyProcessed + averageMonthlyAdjustment
   if (isAppliedDateBeyondData) {
     // Calculate month difference between latestAvailableDate and appliedDate
     const latestDate = new Date(latestAvailableDate + '-01')
@@ -71,84 +57,84 @@ export const getEstimation = (prData: any, appliedDate: string): EstimationResul
     const monthDiff = (appliedDateObj.getFullYear() - latestDate.getFullYear()) * 12 + 
                      (appliedDateObj.getMonth() - latestDate.getMonth())
     
-    // Calculate net monthly increment (new applications - processed applications)
-    const averageMonthlyIncrement = averageMonthlyNewApplication - averageMonthlyProcessed
-    
-    // Add estimated net increment for the months beyond available data
-    const estimatedNetIncrement = averageMonthlyIncrement * monthDiff
-    remaining += estimatedNetIncrement
-    
-    // Update newApplications to use the estimated value for future calculations
-    newApplications = averageMonthlyNewApplication * monthDiff
+    // Add estimated net change for the months beyond available data
+
+    // Calculate net monthly change (new applications - processed applications + adjustment)
+    const estimatedNetMonthlyChange = averageMonthlyNewApplication - averageMonthlyProcessed + averageMonthlyAdjustment
+    const estimatedNetChange = estimatedNetMonthlyChange * monthDiff
+    remaining += estimatedNetChange
   }
 
-  // Step 4: If the latest date in available data is older than today's month, 
-  // continuously minus the averageMonthlyProcessed for the months in between
-  const today = new Date()
-  const currentYearMonth = formatDate(today)
+  // Step 2: Minus the total processed of the following months based on real data
+  const startFromDateIndex = availableDates.indexOf(startFromDate)
+  const followingDates = availableDates.slice(startFromDateIndex + 1) // return [] if the startFromDate is out of range
   
-  if (latestAvailableDate < currentYearMonth) {
+  for (const date of followingDates) {
+    const processedData = prData.data[date]
+    const processed = getCategoryValue(processedData, "300000")
+    remaining -= processed
+    // Add monthly adjustment to account for data corrections and reporting delays
+    remaining += averageMonthlyAdjustment
     
-    
-    // Calculate months between latest available date and current month
-    const latestDate = new Date(latestAvailableDate + '-01')
-    const currentDateObj = new Date(currentYearMonth + '-01')
-    const monthsDiff = (currentDateObj.getFullYear() - latestDate.getFullYear()) * 12 + 
-                      (currentDateObj.getMonth() - latestDate.getMonth())
-    remaining -= (averageMonthlyProcessed * monthsDiff)
-  }
-
-  // Step 5: Estimate the earliest & latest year month (YYYY-MM) based on remaining applications and new applications
-  if (averageMonthlyProcessed <= 0) {
-    return {
-      remaining: remaining.toLocaleString(),
-      earliest: 'N/A',
-      latest: 'N/A',
-      averageMonthlyProcessed: 0
+    // Stop calculation if remaining <= 0 (application has been processed)
+    // The date would be the earliest date of the application being processed
+    if (remaining <= 0) {
+      return {
+        remaining: '0',
+        earliest: date,
+        latest: (() => {
+          const [year, month] = date.split('-').map(Number);
+          let newMonth = month + 2;
+          let newYear = year;
+          if (newMonth > 12) {
+            newYear += Math.floor((newMonth - 1) / 12);
+            newMonth = ((newMonth - 1) % 12) + 1;
+          }
+          return `${newYear}-${newMonth.toString().padStart(2, '0')}`;
+        })(),
+        averageMonthlyProcessed: 0
+      }
     }
   }
 
-  const currentDate = new Date()
-  
-  // Check if remaining applications is <= 0 (already processed or exactly processed)
-  if (remaining <= 0) {
-    const monthsProcessedAgo = Math.ceil(Math.abs(remaining) / averageMonthlyProcessed)
-    const processedDate = new Date(currentDate)
-    processedDate.setMonth(processedDate.getMonth() - monthsProcessedAgo)
+  // Step 3: Start a while loop to calculate remaining applications month by month
+  // until remaining <= 0, using average monthly processed and adjustment values
+  let yearMonthCursor = latestAvailableDate
+  let remainingCursor = remaining
+
+  while (remainingCursor > 0) {
+    // Increase ONE month based on the startFromDate in YYYY-MM format
+    const [year, month] = yearMonthCursor.split('-').map(Number);
+    let newMonth = month + 1;
+    let newYear = year;
+    if (newMonth > 12) {
+      newYear += Math.floor((newMonth - 1) / 12);
+      newMonth = ((newMonth - 1) % 12) + 1;
+    }
+    yearMonthCursor = `${newYear}-${newMonth.toString().padStart(2, '0')}`
     
-    const monthsToProcessNew = Math.ceil(newApplications / averageMonthlyProcessed)
-    const latestDate = new Date(processedDate)
-    latestDate.setMonth(latestDate.getMonth() + monthsToProcessNew)
+    // Calculate the remaining by minus the averageMonthlyProcessed + averageMonthlyAdjustment
+    remainingCursor -= (averageMonthlyProcessed + averageMonthlyAdjustment)
     
-    return {
-      remaining: '0',
-      earliest: formatDate(processedDate),
-      latest: formatDate(latestDate),
-      averageMonthlyProcessed
+    // Break and return if remaining <= 0
+    if (remainingCursor <= 0) {
+      break;
     }
   }
-
-  // Ensure remaining is not negative for future calculations
-  remaining = Math.max(0, remaining)
-
-  // Calculate months needed to process the remaining applications
-  const monthsToProcessRemaining = Math.ceil(remaining / averageMonthlyProcessed)
-  
-  // Calculate months needed to process the new applications (worst case scenario)
-  const monthsToProcessNew = Math.ceil(newApplications / averageMonthlyProcessed)
-  
-  // Calculate earliest date: when remaining applications will be processed (from current date)
-  const earliestDate = new Date(currentDate)
-  earliestDate.setMonth(earliestDate.getMonth() + monthsToProcessRemaining)
-  
-  // Calculate latest date: add the time needed to process new applications + 1 month safety margin
-  const latestDate = new Date(currentDate)
-  latestDate.setMonth(latestDate.getMonth() + monthsToProcessRemaining + monthsToProcessNew + 1)
 
   return {
     remaining: remaining.toLocaleString(),
-    earliest: formatDate(earliestDate),
-    latest: formatDate(latestDate),
-    averageMonthlyProcessed
+    earliest: yearMonthCursor,
+    latest: (() => {
+      const [year, month] = yearMonthCursor.split('-').map(Number);
+      let newMonth = month + 2;
+      let newYear = year;
+      if (newMonth > 12) {
+        newYear += Math.floor((newMonth - 1) / 12);
+        newMonth = ((newMonth - 1) % 12) + 1;
+      }
+      return `${newYear}-${newMonth.toString().padStart(2, '0')}`;
+    })(),
+    averageMonthlyProcessed: averageMonthlyProcessed
   }
 } 
