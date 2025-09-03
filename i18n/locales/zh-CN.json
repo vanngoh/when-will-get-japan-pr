@@ -5,8 +5,8 @@
   "selectYear": "选择年份",
   "predict": "预测",
   "predictionResult": "预测结果",
-  "dataUpdated": "数据更新时间：{date}",
-  "latestAvailableDate": "数据中最新可用日期：{date}",
+  "dataUpdated": "官方统计数据更新时间：{date}",
+  "latestAvailableDate": "官方统计数据最新可参考日期：{date}",
   "viewRawData": "查看原始数据",
   "ifAppliedIn": "如果您在 {date} 申请，以下是您的预测：",
   "applicationProcessed": "（您的申请可能已经处理完成！）",
@@ -36,10 +36,11 @@
   },
   "chart": {
     "title": "永住申请历史数据",
-    "description": "日本入国管理局官方历史统计数据。您的申请日期：{date}",
+    "disclaimer": "基于日本入国管理局官方历史统计数据计算。实际情况可能有所不同，仅供参考。",
     "totalApplications": "总申请数",
     "processedApplications": "已处理申请",
     "newApplications": "新增申请",
+    "remainingApplications": "剩余申请",
     "appliedDate": "您的申请日期",
     "month": "月份",
     "applications": "申请数量"
