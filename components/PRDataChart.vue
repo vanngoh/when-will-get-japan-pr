@@ -39,9 +39,10 @@ const chartData = computed(() => {
   const totalApplications: number[] = []
   const processedApplications: number[] = []
   const newApplications: number[] = []
+  const remainingApplications: number[] = []
 
   // Calculate data for each month
-  dates.forEach((date) => {
+  dates.forEach((date, index) => {
     const monthData = props.prData!.data[date]
     
     // Total existing applications (100000)
@@ -55,6 +56,32 @@ const chartData = computed(() => {
     // New applications (103000)
     const newApps = getCategoryValue(monthData, "103000")
     newApplications.push(newApps)
+    
+    // Calculate remaining applications for user's applied date and after
+    if (props.appliedDate && date >= props.appliedDate) {
+      // Find the applied date data to get the initial remaining count
+      const appliedDateData = props.prData!.data[props.appliedDate]
+      const appliedDateTotal = getCategoryValue(appliedDateData, "100000")
+      let remaining = appliedDateTotal
+      
+      // Subtract processed applications from all months after applied date
+      const appliedDateIndex = allDates.indexOf(props.appliedDate)
+      const currentDateIndex = allDates.indexOf(date)
+      
+      if (currentDateIndex > appliedDateIndex) {
+        // For dates after applied date, subtract all processed applications from applied date to current date
+        for (let i = appliedDateIndex + 1; i <= currentDateIndex; i++) {
+          const futureMonthData = props.prData!.data[allDates[i]]
+          const futureProcessed = getCategoryValue(futureMonthData, "300000")
+          remaining -= futureProcessed
+        }
+      }
+      
+      remainingApplications.push(Math.max(0, remaining))
+    } else {
+      // For dates before applied date, show 0
+      remainingApplications.push(0)
+    }
   })
 
   // Format dates for display
@@ -68,6 +95,7 @@ const chartData = computed(() => {
     totalApplications,
     processedApplications,
     newApplications,
+    remainingApplications,
   }
 })
 
@@ -86,6 +114,14 @@ const createChart = () => {
       name: t('chart.totalApplications'),
       marker: { color: '#3b82f6', opacity: 0.6 },
       yaxis: 'y'
+    },
+    {
+      x: data.dates,
+      y: data.remainingApplications,
+      type: 'bar',
+      name: t('chart.remainingApplications'),
+      marker: { color: '#ef4444', opacity: 0.6 },
+      yaxis: 'y1'
     },
     {
       x: data.dates,
