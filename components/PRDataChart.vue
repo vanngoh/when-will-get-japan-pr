@@ -138,6 +138,13 @@ const createChart = () => {
     hovermode: 'x unified',
     dragmode: false,
     showlegend: true,
+    hoverlabel: {
+      bgcolor: isDark.value === 'dark' ? '#1f2937' : '#ffffff',
+      bordercolor: isDark.value === 'dark' ? '#374151' : '#e5e7eb',
+      font: {
+        color: isDark.value === 'dark' ? '#ffffff' : '#374151'
+      }
+    },
     legend: {
       orientation: 'h',
       y: -0.2,
