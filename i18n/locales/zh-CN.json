@@ -33,5 +33,15 @@
     "oct": "十月",
     "nov": "十一",
     "dec": "十二"
+  },
+  "chart": {
+    "title": "永住申请历史数据",
+    "description": "日本入国管理局官方历史统计数据。您的申请日期：{date}",
+    "totalApplications": "总申请数",
+    "processedApplications": "已处理申请",
+    "newApplications": "新增申请",
+    "appliedDate": "您的申请日期",
+    "month": "月份",
+    "applications": "申请数量"
   }
 } 

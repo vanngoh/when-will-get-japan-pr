@@ -142,6 +142,23 @@
           </div>
         </div>
       </UCard>
+
+    <!-- Interactive Chart Section -->
+    <UCard v-if="prData" class="max-w-2xl mx-auto mb-16">
+      <template #header>
+        <div class="flex items-center gap-2">
+          <UIcon name="i-heroicons-chart-bar" class="w-5 h-5" />
+          <h2 class="text-xl font-semibold">{{ $t('chart.title') }}</h2>
+        </div>
+      </template>
+      
+      <div class="space-y-4">
+        <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+          {{ $t('chart.description', { date: appliedDate }) }}
+        </p>
+        <PRDataChart :pr-data="prData" :applied-date="appliedDate" />
+      </div>
+    </UCard>
   </div>
 </template>
 

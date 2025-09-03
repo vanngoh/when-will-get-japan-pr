@@ -33,5 +33,15 @@
     "oct": "Oct",
     "nov": "Nov",
     "dec": "Dec"
+  },
+  "chart": {
+    "title": "Historical PR Application Data",
+    "description": "Official historical data from Japanese immigration statistics. Your applied date: {date}",
+    "totalApplications": "Total Applications",
+    "processedApplications": "Processed Applications",
+    "newApplications": "New Applications",
+    "appliedDate": "Your Applied Date",
+    "month": "Month",
+    "applications": "Number of Applications"
   }
 } 
