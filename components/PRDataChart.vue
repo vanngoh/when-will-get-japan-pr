@@ -42,7 +42,7 @@ const chartData = computed(() => {
   const remainingApplications: number[] = []
 
   // Calculate data for each month
-  dates.forEach((date, index) => {
+  dates.forEach((date) => {
     const monthData = props.prData!.data[date]
     
     // Total existing applications (100000)
