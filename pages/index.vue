@@ -154,7 +154,8 @@
       
       <div class="space-y-4">
         <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-          {{ $t('chart.description', { date: appliedDate }) }}
+          {{ $t('chart.appliedDate') }}: {{ appliedDate }}<br>
+          {{ $t('chart.disclaimer') }}
         </p>
         <PRDataChart :pr-data="prData" :applied-date="appliedDate" />
       </div>

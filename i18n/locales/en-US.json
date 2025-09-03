@@ -36,7 +36,7 @@
   },
   "chart": {
     "title": "Historical PR Application Data",
-    "description": "Official historical data from Japanese immigration statistics. Your applied date: {date}",
+    "disclaimer": "Calculated based on official historical data from Japanese immigration statistics. Reality may differ - use as reference only.",
     "totalApplications": "Total Applications",
     "processedApplications": "Processed Applications",
     "newApplications": "New Applications",

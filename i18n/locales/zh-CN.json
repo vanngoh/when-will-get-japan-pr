@@ -36,7 +36,7 @@
   },
   "chart": {
     "title": "永住申请历史数据",
-    "description": "日本入国管理局官方历史统计数据。您的申请日期：{date}",
+    "disclaimer": "基于日本入国管理局官方历史统计数据计算。实际情况可能有所不同，仅供参考。",
     "totalApplications": "总申请数",
     "processedApplications": "已处理申请",
     "newApplications": "新增申请",
