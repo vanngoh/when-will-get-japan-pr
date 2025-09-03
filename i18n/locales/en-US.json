@@ -40,6 +40,7 @@
     "totalApplications": "Total Applications",
     "processedApplications": "Processed Applications",
     "newApplications": "New Applications",
+    "remainingApplications": "Remaining Applications",
     "appliedDate": "Your Applied Date",
     "month": "Month",
     "applications": "Number of Applications"

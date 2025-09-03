@@ -40,6 +40,7 @@
     "totalApplications": "總申請數",
     "processedApplications": "已處理申請",
     "newApplications": "新增申請",
+    "remainingApplications": "剩餘申請",
     "appliedDate": "您的申請日期",
     "month": "月份",
     "applications": "申請數量"
