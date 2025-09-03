@@ -136,6 +136,7 @@ const createChart = () => {
       showgrid: false
     },
     hovermode: 'x unified',
+    dragmode: false,
     showlegend: true,
     legend: {
       orientation: 'h',
@@ -154,8 +155,7 @@ const createChart = () => {
 
   const config = {
     responsive: true,
-    displayModeBar: true,
-    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+    displayModeBar: false,
     displaylogo: false
   }
 
