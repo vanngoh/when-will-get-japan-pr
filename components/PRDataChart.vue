@@ -82,11 +82,10 @@ const createChart = () => {
     {
       x: data.dates,
       y: data.totalApplications,
-      type: 'scatter',
-      mode: 'lines+markers',
+      type: 'bar',
       name: t('chart.totalApplications'),
-      line: { color: '#3b82f6', width: 3 },
-      marker: { size: 6 }
+      marker: { color: '#3b82f6', opacity: 0.6 },
+      yaxis: 'y'
     },
     {
       x: data.dates,
@@ -95,7 +94,8 @@ const createChart = () => {
       mode: 'lines+markers',
       name: t('chart.processedApplications'),
       line: { color: '#10b981', width: 3 },
-      marker: { size: 6 }
+      marker: { size: 6 },
+      yaxis: 'y2'
     },
     {
       x: data.dates,
@@ -104,7 +104,8 @@ const createChart = () => {
       mode: 'lines+markers',
       name: t('chart.newApplications'),
       line: { color: '#f59e0b', width: 3 },
-      marker: { size: 6 }
+      marker: { size: 6 },
+      yaxis: 'y2'
     }
   ]
 
@@ -131,9 +132,17 @@ const createChart = () => {
       showgrid: false
     },
     yaxis: {
+      title: t('chart.totalApplications'),
+      tickformat: ',',
+      showgrid: false,
+      side: 'left'
+    },
+    yaxis2: {
       title: t('chart.applications'),
       tickformat: ',',
-      showgrid: false
+      showgrid: false,
+      side: 'right',
+      overlaying: 'y'
     },
     hovermode: 'x unified',
     dragmode: false,
