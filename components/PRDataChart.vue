@@ -34,8 +34,8 @@ const chartData = computed(() => {
   if (!props.prData?.data) return null
 
   const allDates = Object.keys(props.prData.data).sort()
-  // Take only the last 15 data points
-  const dates = allDates.slice(-15)
+  // Take only the last 36 data points
+  const dates = allDates.slice(-36)
   const totalApplications: number[] = []
   const processedApplications: number[] = []
   const newApplications: number[] = []
