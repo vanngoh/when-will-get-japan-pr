@@ -26,7 +26,7 @@
         <USelect
           class="w-full flex items-center justify-center"
           v-model="selectedBranch"
-          :items="branches.map(b => ({ label: $t(`branches.${b.branchCode}`), value: b.branchCode }))"
+          :items="branchOptions"
           :placeholder="$t('selectBranch') || 'Select a branch'"
           :loading="branchesLoading"
           color="info"
@@ -252,6 +252,14 @@ const monthOptions = computed(() => {
     })
   }
   return months
+})
+
+// Generate branch options with translated names
+const branchOptions = computed(() => {
+  return branches.value.map(b => ({ 
+    label: $t(`branches.${b.branchCode}`), 
+    value: b.branchCode 
+  }))
 })
 
 const loading = ref(false)
