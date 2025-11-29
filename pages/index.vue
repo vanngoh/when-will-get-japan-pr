@@ -25,6 +25,16 @@
       <div class="space-y-4">
         <USelect
           class="w-full flex items-center justify-center"
+          v-model="selectedBranch"
+          :items="branches.map(b => ({ label: $t(`branches.${b.branchCode}`), value: b.branchCode }))"
+          :placeholder="$t('selectBranch') || 'Select a branch'"
+          :loading="branchesLoading"
+          color="info"
+          highlight
+        />
+        
+        <USelect
+          class="w-full flex items-center justify-center"
           v-model="appliedYear"
           :items="yearOptions"
           :placeholder="$t('selectYear')"
@@ -180,6 +190,11 @@ interface PredictionResult {
   monthsToSolve: number
 }
 
+interface Branch {
+  branchCode: string
+  branchName: string
+}
+
 // Dynamic meta tags with i18n support
 const { locale } = useI18n()
 
@@ -209,6 +224,9 @@ useHead({
 const appliedYear = ref<number>(new Date().getFullYear())
 const appliedMonth = ref<string>(formatDate(new Date()).split('-')[1])
 const appliedDate = ref<string>(`${appliedYear.value}-${appliedMonth.value}`)
+const selectedBranch = ref<string>('')
+const branches = ref<Branch[]>([])
+const branchesLoading = ref(false)
 
 // Generate year options from 2021 to current year + 1 (allow future planning)
 const yearOptions = computed(() => {
@@ -275,6 +293,24 @@ const fetchPRData = async () => {
     dataLoading.value = false
   }
 }
+
+// Fetch branches list from GitHub
+const fetchBranches = async () => {
+  try {
+    branchesLoading.value = true
+    const response = await $fetch('https://raw.githubusercontent.com/vanngoh/estat-jp/main/json/branches/list.json')
+    branches.value = JSON.parse(response as string) as Branch[]
+  } catch (error) {
+    console.error('Error fetching branches:', error)
+  } finally {
+    branchesLoading.value = false
+  }
+}
+
+// Fetch branches on component mount
+onMounted(() => {
+  fetchBranches()
+})
 
 
 const predictPR = async () => {
