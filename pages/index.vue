@@ -287,12 +287,12 @@ const latestAvailableDate = computed(() => {
 })
 
 // Fetch PR data from GitHub
-const fetchPRData = async () => {
+const fetchPRData = async (branchCode: string) => {
   try {
     dataLoading.value = true
     dataError.value = null
     
-    const response = await $fetch('https://raw.githubusercontent.com/vanngoh/estat-jp/main/json/pr.json')
+    const response = await $fetch(`https://raw.githubusercontent.com/vanngoh/estat-jp/main/json/branches/${branchCode}.json`)
     prData.value = JSON.parse(response as string) as PRData
   } catch (error) {
     console.error('Error fetching PR data:', error)
@@ -322,16 +322,14 @@ onMounted(() => {
 
 
 const predictPR = async () => {
-  if (!appliedYear.value || !appliedMonth.value) {
+  if (!appliedYear.value || !appliedMonth.value || !selectedBranch.value) {
     return
   }
 
   loading.value = true
 
-  // Fetch PR data if not loaded
-  if (!prData.value) {
-    await fetchPRData()
-  }
+  // Fetch PR data for selected branch
+  await fetchPRData(selectedBranch.value)
   
   // Use the loaded PR data for prediction
   if (prData.value) {
