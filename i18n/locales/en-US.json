@@ -2,6 +2,7 @@
   "title": "🇯🇵 Permanent Residency Prediction",
   "description": "A tool which predicts when you can get Japanese Permanent Residency on your application date.",
   "whenApply": "When do you apply for permanent residency?",
+  "selectBranch": "Select a branch",
   "selectYear": "Select year",
   "predict": "Predict",
   "predictionResult": "Prediction Result",
@@ -33,6 +34,19 @@
     "oct": "Oct",
     "nov": "Nov",
     "dec": "Dec"
+  },
+  "branches": {
+    "101010": "Sapporo",
+    "101090": "Sendai",
+    "101170": "Tokyo",
+    "101210": "Yokohama",
+    "101350": "Nagoya",
+    "101460": "Osaka",
+    "101490": "Kobe",
+    "101580": "Hiroshima",
+    "101670": "Takamatsu",
+    "101720": "Fukuoka",
+    "101740": "Naha"
   },
   "chart": {
     "title": "Historical PR Application Data",
