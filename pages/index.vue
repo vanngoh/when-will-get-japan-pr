@@ -274,6 +274,7 @@ const predictionResult = ref<PredictionResult>({
 const prData = ref<PRData | null>(null)
 const dataLoading = ref(true)
 const dataError = ref<string | null>(null)
+const prDataCache = ref<Record<string, PRData>>({})
 
 // Computed properties for better performance
 // const appliedDate = computed(() => `${appliedYear.value}-${appliedMonth.value}`)
@@ -286,14 +287,24 @@ const latestAvailableDate = computed(() => {
   return dates.length > 0 ? dates[dates.length - 1] : ''
 })
 
-// Fetch PR data from GitHub
-const fetchPRData = async () => {
+// Fetch PR data from GitHub with caching
+const fetchPRData = async (branchCode: string) => {
+  // Check cache first
+  if (prDataCache.value[branchCode]) {
+    prData.value = prDataCache.value[branchCode]
+    return
+  }
+
   try {
     dataLoading.value = true
     dataError.value = null
     
-    const response = await $fetch('https://raw.githubusercontent.com/vanngoh/estat-jp/main/json/pr.json')
-    prData.value = JSON.parse(response as string) as PRData
+    const response = await $fetch(`https://raw.githubusercontent.com/vanngoh/estat-jp/main/json/branches/${branchCode}.json`)
+    const data = JSON.parse(response as string) as PRData
+    
+    // Cache the data
+    prDataCache.value[branchCode] = data
+    prData.value = data
   } catch (error) {
     console.error('Error fetching PR data:', error)
     dataError.value = 'Failed to load PR data. Please try again later.'
@@ -322,16 +333,14 @@ onMounted(() => {
 
 
 const predictPR = async () => {
-  if (!appliedYear.value || !appliedMonth.value) {
+  if (!appliedYear.value || !appliedMonth.value || !selectedBranch.value) {
     return
   }
 
   loading.value = true
 
-  // Fetch PR data if not loaded
-  if (!prData.value) {
-    await fetchPRData()
-  }
+  // Fetch PR data for selected branch
+  await fetchPRData(selectedBranch.value)
   
   // Use the loaded PR data for prediction
   if (prData.value) {
