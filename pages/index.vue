@@ -225,8 +225,13 @@ const route = useRoute()
 const router = useRouter()
 
 // Reactive state - initialize from query params if available
-const appliedYear = ref<number>(route.query.year ? parseInt(route.query.year as string) : new Date().getFullYear())
-const appliedMonth = ref<string>(route.query.month ? (route.query.month as string) : formatDate(new Date()).split('-')[1])
+const yearParam = route.query.year ? parseInt(route.query.year as string) : NaN
+const appliedYear = ref<number>(route.query.year && !isNaN(yearParam) ? yearParam : new Date().getFullYear())
+
+const monthParam = route.query.month as string
+const isValidMonth = monthParam && /^(0[1-9]|1[0-2])$/.test(monthParam)
+const appliedMonth = ref<string>(isValidMonth ? monthParam : formatDate(new Date()).split('-')[1])
+
 const appliedDate = ref<string>(`${appliedYear.value}-${appliedMonth.value}`)
 const selectedBranch = ref<string>(route.query.branch ? (route.query.branch as string) : '')
 const branches = ref<Branch[]>([])
