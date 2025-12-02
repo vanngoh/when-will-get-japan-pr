@@ -245,7 +245,16 @@ watch([selectedBranch, appliedYear, appliedMonth], ([branch, year, month]) => {
   if (year) query.year = year.toString()
   if (month) query.month = month
   
-  router.replace({ query })
+  // Only update router if query params actually changed
+  const currentQuery = route.query
+  const hasChanged = 
+    currentQuery.branch !== (branch || undefined) ||
+    currentQuery.year !== (year ? year.toString() : undefined) ||
+    currentQuery.month !== (month || undefined)
+  
+  if (hasChanged) {
+    router.replace({ query })
+  }
 })
 
 // Generate year options from 2021 to current year + 1 (allow future planning)
