@@ -359,9 +359,12 @@ const fetchBranches = async () => {
 onMounted(async () => {
   await fetchBranches()
   
-  // Auto-predict if all query params are present
+  // Auto-predict if all query params are present and branch is valid
   if (route.query.branch && route.query.year && route.query.month) {
-    await predictPR()
+    const isValidBranch = branches.value.some(b => b.branchCode === selectedBranch.value)
+    if (isValidBranch) {
+      await predictPR()
+    }
   }
 })
 
