@@ -220,13 +220,42 @@ useHead({
   ]
 })
 
-// Reactive state
-const appliedYear = ref<number>(new Date().getFullYear())
-const appliedMonth = ref<string>(formatDate(new Date()).split('-')[1])
+// Router for query params
+const route = useRoute()
+const router = useRouter()
+
+// Reactive state - initialize from query params if available
+const yearParam = route.query.year ? parseInt(route.query.year as string) : NaN
+const appliedYear = ref<number>(route.query.year && !isNaN(yearParam) ? yearParam : new Date().getFullYear())
+
+const monthParam = route.query.month as string
+const isValidMonth = monthParam && /^(0[1-9]|1[0-2])$/.test(monthParam)
+const appliedMonth = ref<string>(isValidMonth ? monthParam : formatDate(new Date()).split('-')[1])
+
 const appliedDate = ref<string>(`${appliedYear.value}-${appliedMonth.value}`)
-const selectedBranch = ref<string>('')
+const selectedBranch = ref<string>(route.query.branch ? (route.query.branch as string) : '')
 const branches = ref<Branch[]>([])
 const branchesLoading = ref(false)
+
+// Update URL query params when values change
+watch([selectedBranch, appliedYear, appliedMonth], ([branch, year, month]) => {
+  const query: Record<string, string> = {}
+  
+  if (branch) query.branch = branch
+  if (year) query.year = year.toString()
+  if (month) query.month = month
+  
+  // Only update router if query params actually changed
+  const currentQuery = route.query
+  const hasChanged = 
+    currentQuery.branch !== (branch || undefined) ||
+    currentQuery.year !== (year ? year.toString() : undefined) ||
+    currentQuery.month !== (month || undefined)
+  
+  if (hasChanged) {
+    router.replace({ query })
+  }
+})
 
 // Generate year options from 2021 to current year + 1 (allow future planning)
 const yearOptions = computed(() => {
@@ -327,8 +356,16 @@ const fetchBranches = async () => {
 }
 
 // Fetch branches on component mount
-onMounted(() => {
-  fetchBranches()
+onMounted(async () => {
+  await fetchBranches()
+  
+  // Auto-predict if all query params are present and branch is valid
+  if (route.query.branch && route.query.year && route.query.month) {
+    const isValidBranch = branches.value.some(b => b.branchCode === selectedBranch.value)
+    if (isValidBranch) {
+      await predictPR()
+    }
+  }
 })
 
 
