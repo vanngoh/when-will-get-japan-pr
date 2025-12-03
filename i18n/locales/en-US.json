@@ -2,9 +2,12 @@
   "title": "🇯🇵 Permanent Residency Prediction",
   "description": "A tool which predicts when you can get Japanese Permanent Residency on your application date.",
   "whenApply": "When do you apply for permanent residency?",
-  "selectBranch": "Select a branch",
+  "selectBranch": "Select immigration branch",
   "selectYear": "Select year",
   "predict": "Predict",
+  "errors": {
+    "selectBranchRequired": "Please select immigration branch first"
+  },
   "predictionResult": "Prediction Result",
   "dataUpdated": "Official statistic data updated: {date}",
   "latestAvailableDate": "Latest referable date from official statistic data: {date}",

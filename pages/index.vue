@@ -223,6 +223,7 @@ useHead({
 // Router for query params
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
 // Reactive state - initialize from query params if available
 const yearParam = route.query.year ? parseInt(route.query.year as string) : NaN
@@ -370,7 +371,16 @@ onMounted(async () => {
 
 
 const predictPR = async () => {
-  if (!appliedYear.value || !appliedMonth.value || !selectedBranch.value) {
+  if (!selectedBranch.value) {
+    toast.add({
+      title: $t('errors.selectBranchRequired'),
+      color: 'error',
+      icon: 'i-heroicons-exclamation-circle'
+    })
+    return
+  }
+  
+  if (!appliedYear.value || !appliedMonth.value) {
     return
   }
 
