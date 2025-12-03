@@ -214,9 +214,13 @@ useHead({
     { property: 'og:locale:alternate', content: 'en-US' },
     { property: 'og:locale:alternate', content: 'zh-TW' },
     { property: 'og:locale:alternate', content: 'zh-CN' },
+    { property: 'og:image', content: 'https://whenwillgetjapanpr.web.app/og-image.png' },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: () => `${$t('title')}` },
-    { name: 'twitter:description', content: () => $t('description') }
+    { name: 'twitter:description', content: () => $t('description') },
+    { name: 'twitter:image', content: 'https://whenwillgetjapanpr.web.app/og-image.png' }
   ]
 })
 
