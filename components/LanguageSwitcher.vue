@@ -26,7 +26,7 @@ const availableLocales = computed(() => locales.value.map(locale => ({
 const switchLanguage = (newLocale: unknown) => {
   if (typeof newLocale === 'string') {
     setLocale(newLocale as 'en-US' | 'zh-TW' | 'zh-CN')
-    router.push({ query: { ...route.query, lang: newLocale } })
+    router.replace({ query: { ...route.query, lang: newLocale } })
   }
 }
 </script> 
