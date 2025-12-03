@@ -5,6 +5,17 @@
 </template>
 
 <script setup lang="ts">
-// This is the main app component for SPA
-// Client-side routing is handled by Nuxt's built-in router
+const { setLocale, locales } = useI18n()
+const route = useRoute()
+
+// Set locale from query string on mount
+onMounted(() => {
+  const langFromQuery = route.query.lang as string
+  if (langFromQuery) {
+    const validLocale = locales.value.find(l => l.code === langFromQuery)
+    if (validLocale) {
+      setLocale(langFromQuery as 'en-US' | 'zh-TW' | 'zh-CN')
+    }
+  }
+})
 </script> 
