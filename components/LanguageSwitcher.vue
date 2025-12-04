@@ -14,6 +14,8 @@
 
 <script setup lang="ts">
 const { locale, locales, setLocale } = useI18n()
+const router = useRouter()
+const route = useRoute()
 
 const currentLocale = computed(() => locale.value)
 const availableLocales = computed(() => locales.value.map(locale => ({
@@ -21,12 +23,10 @@ const availableLocales = computed(() => locales.value.map(locale => ({
   value: locale.code
 })))
 
-console.log(currentLocale.value, availableLocales.value)
-
 const switchLanguage = (newLocale: unknown) => {
   if (typeof newLocale === 'string') {
-    console.log('switchLanguage', newLocale)
     setLocale(newLocale as 'en-US' | 'zh-TW' | 'zh-CN')
+    router.replace({ query: { ...route.query, lang: newLocale } })
   }
 }
 </script> 
