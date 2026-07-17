@@ -82,6 +82,12 @@
             <br>
             {{ $t('latestAvailableDate', { date: new Date(latestAvailableDate).toLocaleDateString($i18n.locale, { year: 'numeric', month: 'long', day: 'numeric' }) }) }}
           </p>
+          <UAlert
+            color="info"
+            variant="soft"
+            :description="$t('predictionDisclaimer')"
+            icon="i-heroicons-information-circle"
+          />
           <UCollapsible>
             <UButton size="sm" color="info" variant="ghost" class="w-full flex items-center justify-center">
               {{ $t('viewRawData') }}
@@ -167,7 +173,12 @@
           {{ $t('chart.appliedDate') }}: {{ appliedDate }}<br>
           {{ $t('chart.disclaimer') }}
         </p>
-        <PRDataChart :pr-data="prData" :applied-date="appliedDate" />
+        <PRDataChart
+          :pr-data="prData"
+          :applied-date="appliedDate"
+          :earliest-date="predictionResult.earliestDate"
+          :latest-date="predictionResult.latestDate"
+        />
       </div>
     </UCard>
   </div>
@@ -410,4 +421,4 @@ const predictPR = async () => {
   
   loading.value = false
 }
-</script> 
+</script>

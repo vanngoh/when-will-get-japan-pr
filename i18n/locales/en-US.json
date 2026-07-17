@@ -13,14 +13,15 @@
   "latestAvailableDate": "Latest referable date from official statistic data: {date}",
   "viewRawData": "View Raw Data",
   "ifAppliedIn": "If you applied in {date}, here's your prediction:",
-  "applicationProcessed": "(Your application has likely been processed!)",
+  "applicationProcessed": "The model places the case within the possible notification window; a pending notice can still be normal.",
+  "predictionDisclaimer": "This is a conservative estimate. Aggregate immigration statistics cannot identify individual cases or prove that cases are handled in application order. Treat these dates as a planning range, not a guarantee.",
   "dataNotAvailable": "At this time, the official data for your specified date is not yet available. Using latest available data for estimation.",
   "usingDataUpTo": "Using data up to {date} for estimation:",
-  "inQueue": "in queue",
-  "monthlySolved": "monthly solved",
+  "inQueue": "estimated workload ahead",
+  "monthlySolved": "conservative effective monthly throughput",
   "monthlyNew": "monthly new",
-  "earliest": "earliest",
-  "latest": "latest",
+  "earliest": "notification more likely from",
+  "latest": "conservative estimate through",
   "toggleTheme": "Toggle theme",
   "light": "Light",
   "dark": "Dark",
@@ -53,13 +54,19 @@
   },
   "chart": {
     "title": "Historical PR Application Data",
-    "disclaimer": "Calculated based on official historical data from Japanese immigration statistics. Reality may differ - use as reference only.",
+    "disclaimer": "The gray dotted line assumes cases are handled strictly in application order; red and purple show the likely and conservative paths. The pink notification window starts when the red line reaches zero.",
     "totalApplications": "Total Applications",
     "processedApplications": "Processed Applications",
     "newApplications": "New Applications",
     "remainingApplications": "Remaining Applications",
+    "fifoRemaining": "Remaining if processed in order",
+    "likelyRemaining": "Likely remaining (80%)",
+    "conservativeRemaining": "Conservative remaining (70%)",
+    "notificationWindow": "Estimated notification window",
     "appliedDate": "Your Applied Date",
     "month": "Month",
-    "applications": "Number of Applications"
+    "applications": "Number of Applications",
+    "workload": "Total / estimated workload ahead",
+    "monthlyVolume": "Monthly new / processed"
   }
-} 
+}

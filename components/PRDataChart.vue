@@ -1,6 +1,6 @@
 <template>
   <div class="w-full">
-    <div ref="chartContainer" class="w-full h-96"></div>
+    <div ref="chartContainer" class="w-full h-[32rem]"></div>
   </div>
 </template>
 
@@ -8,120 +8,112 @@
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min'
 import { getCategoryValue } from '~/utils/getCategoryValue'
-import { getAverageMonthlyProcessed } from '~/utils/getAverageMonthlyProcessed'
-import { getAverageMonthlyNewApplication } from '~/utils/getAverageMonthlyNewApplication'
+import { getEstimationTimeline } from '~/utils/getEstimation'
 
 interface PRData {
   updatedAt: string
-  data: {
-    [key: string]: any
-  }
+  data: Record<string, any>
 }
 
 interface Props {
   prData: PRData | null
   appliedDate?: string
+  earliestDate?: string
+  latestDate?: string
 }
 
 const props = defineProps<Props>()
 const chartContainer = ref<HTMLElement>()
-
 const { t, locale } = useI18n()
-const isDark = useColorMode()
+const colorMode = useColorMode()
 
-// Process data for visualization
 const chartData = computed(() => {
   if (!props.prData?.data) return null
 
-  const allDates = Object.keys(props.prData.data).sort()
-  // Take only the last 36 data points
-  const dates = allDates.slice(-36)
-  const totalApplications: number[] = []
-  const processedApplications: number[] = []
-  const newApplications: number[] = []
-  const remainingApplications: number[] = []
+  const officialDates = Object.keys(props.prData.data).sort()
+  const visibleOfficialDates = officialDates.slice(-36)
+  const timeline = props.appliedDate
+    ? getEstimationTimeline(props.prData, props.appliedDate)
+    : []
+  const timelineByDate = new Map(timeline.map(point => [point.date, point]))
 
-  // Calculate data for each month
-  dates.forEach((date) => {
-    const monthData = props.prData!.data[date]
-    
-    // Total existing applications (100000)
-    const total = getCategoryValue(monthData, "100000")
-    totalApplications.push(total)
-    
-    // Processed applications (300000)
-    const processed = getCategoryValue(monthData, "300000")
-    processedApplications.push(processed)
-    
-    // New applications (103000)
-    const newApps = getCategoryValue(monthData, "103000")
-    newApplications.push(newApps)
-    
-    // Calculate remaining applications for user's applied date and after
-    if (props.appliedDate && date >= props.appliedDate) {
-      // Find the applied date data to get the initial remaining count
-      const appliedDateData = props.prData!.data[props.appliedDate]
-      const appliedDateTotal = getCategoryValue(appliedDateData, "100000")
-      let remaining = appliedDateTotal
-      
-      // Subtract processed applications from all months after applied date
-      const appliedDateIndex = allDates.indexOf(props.appliedDate)
-      const currentDateIndex = allDates.indexOf(date)
-      
-      if (currentDateIndex > appliedDateIndex) {
-        // For dates after applied date, subtract all processed applications from applied date to current date
-        for (let i = appliedDateIndex + 1; i <= currentDateIndex; i++) {
-          const futureMonthData = props.prData!.data[allDates[i]]
-          const futureProcessed = getCategoryValue(futureMonthData, "300000")
-          remaining -= futureProcessed
-        }
-      }
-      
-      remainingApplications.push(Math.max(0, remaining))
-    } else {
-      // For dates before applied date, show 0
-      remainingApplications.push(0)
-    }
-  })
-
-  // Format dates for display
-  const formattedDates = dates.map(date => {
-    const [year, month] = date.split('-')
-    return `${year}-${month}`
-  })
+  // Include the complete model path after application, including forecast months,
+  // so every zero crossing can be compared with the notification window.
+  const dates = [...new Set([
+    ...visibleOfficialDates,
+    ...timeline.map(point => point.date)
+  ])].sort()
 
   return {
-    dates: formattedDates,
-    totalApplications,
-    processedApplications,
-    newApplications,
-    remainingApplications,
+    dates,
+    totalApplications: dates.map(date => {
+      const monthData = props.prData!.data[date]
+      return monthData ? getCategoryValue(monthData, '100000') : null
+    }),
+    processedApplications: dates.map(date => {
+      const monthData = props.prData!.data[date]
+      return monthData ? getCategoryValue(monthData, '300000') : null
+    }),
+    newApplications: dates.map(date => {
+      const monthData = props.prData!.data[date]
+      return monthData ? getCategoryValue(monthData, '103000') : null
+    }),
+    fifoRemaining: dates.map(date => timelineByDate.get(date)?.fifoRemaining ?? null),
+    likelyRemaining: dates.map(date => timelineByDate.get(date)?.likelyRemaining ?? null),
+    conservativeRemaining: dates.map(date => timelineByDate.get(date)?.conservativeRemaining ?? null)
   }
 })
 
-// Create the chart
 const createChart = () => {
   if (!chartData.value || !chartContainer.value) return
 
   const data = chartData.value
-  
-  // Create traces for different data series
-  const traces = [
+  const workloadValues = [
+    ...data.totalApplications,
+    ...data.fifoRemaining,
+    ...data.likelyRemaining,
+    ...data.conservativeRemaining
+  ].filter((value): value is number => typeof value === 'number')
+  const maxWorkload = Math.max(1, ...workloadValues)
+
+  const traces: any[] = [
     {
       x: data.dates,
       y: data.totalApplications,
       type: 'bar',
       name: t('chart.totalApplications'),
-      marker: { color: '#3b82f6', opacity: 0.6 },
+      marker: { color: '#3b82f6', opacity: 0.45 },
       yaxis: 'y'
     },
     {
       x: data.dates,
-      y: data.remainingApplications,
-      type: 'bar',
-      name: t('chart.remainingApplications'),
-      marker: { color: '#ef4444', opacity: 0.6 },
-      yaxis: 'y1'
+      y: data.fifoRemaining,
+      type: 'scatter',
+      mode: 'lines',
+      name: t('chart.fifoRemaining'),
+      line: { color: '#94a3b8', width: 2, dash: 'dot' },
+      yaxis: 'y',
+      connectgaps: false
+    },
+    {
+      x: data.dates,
+      y: data.likelyRemaining,
+      type: 'scatter',
+      mode: 'lines',
+      name: t('chart.likelyRemaining'),
+      line: { color: '#ef4444', width: 3 },
+      yaxis: 'y',
+      connectgaps: false
+    },
+    {
+      x: data.dates,
+      y: data.conservativeRemaining,
+      type: 'scatter',
+      mode: 'lines',
+      name: t('chart.conservativeRemaining'),
+      line: { color: '#a855f7', width: 3, dash: 'dash' },
+      yaxis: 'y',
+      connectgaps: false
     },
     {
       x: data.dates,
@@ -129,8 +121,8 @@ const createChart = () => {
       type: 'scatter',
       mode: 'lines+markers',
       name: t('chart.processedApplications'),
-      line: { color: '#10b981', width: 3 },
-      marker: { size: 6 },
+      line: { color: '#10b981', width: 2 },
+      marker: { size: 5 },
       yaxis: 'y2'
     },
     {
@@ -139,99 +131,122 @@ const createChart = () => {
       type: 'scatter',
       mode: 'lines+markers',
       name: t('chart.newApplications'),
-      line: { color: '#f59e0b', width: 3 },
-      marker: { size: 6 },
+      line: { color: '#f59e0b', width: 2 },
+      marker: { size: 5 },
       yaxis: 'y2'
     }
   ]
 
-  // Add prediction line if appliedDate is provided
-  if (props.appliedDate && chartData.value.dates.includes(props.appliedDate)) {
-    const appliedIndex = chartData.value.dates.indexOf(props.appliedDate)
-    const appliedDate = chartData.value.dates[appliedIndex]
-    
-    // Add vertical line at applied date
+  if (props.appliedDate && data.dates.includes(props.appliedDate)) {
     traces.push({
-      x: [appliedDate, appliedDate],
-      y: [0, Math.max(...data.totalApplications)],
+      x: [props.appliedDate, props.appliedDate],
+      y: [0, maxWorkload],
       type: 'scatter',
       mode: 'lines',
       name: t('chart.appliedDate'),
-      line: { color: '#8b5cf6', width: 2, dash: 'dash' },
-      showlegend: true
-    } as any)
+      line: { color: '#7c3aed', width: 2, dash: 'dash' },
+      hoverinfo: 'skip'
+    })
   }
 
-  const layout = {
+  const hasNotificationWindow =
+    props.earliestDate && props.latestDate &&
+    props.earliestDate !== 'N/A' && props.latestDate !== 'N/A'
+
+  if (hasNotificationWindow) {
+    traces.push({
+      x: [
+        props.earliestDate,
+        props.earliestDate,
+        null,
+        props.latestDate,
+        props.latestDate
+      ],
+      y: [0, maxWorkload, null, 0, maxWorkload],
+      type: 'scatter',
+      mode: 'lines',
+      name: t('chart.notificationWindow'),
+      line: { color: '#ec4899', width: 2, dash: 'dashdot' },
+      hoverinfo: 'skip'
+    })
+  }
+
+  const layout: any = {
     xaxis: {
       title: t('chart.month'),
-      showgrid: false
+      showgrid: false,
+      type: 'date',
+      tickformat: '%b %Y',
+      hoverformat: '%b %Y'
     },
     yaxis: {
-      title: t('chart.totalApplications'),
+      title: t('chart.workload'),
       tickformat: ',',
       showgrid: false,
-      side: 'left'
+      side: 'left',
+      rangemode: 'tozero'
     },
     yaxis2: {
-      title: t('chart.applications'),
+      title: t('chart.monthlyVolume'),
       tickformat: ',',
       showgrid: false,
       side: 'right',
-      overlaying: 'y'
+      overlaying: 'y',
+      rangemode: 'tozero'
     },
+    shapes: hasNotificationWindow
+      ? [{
+          type: 'rect',
+          xref: 'x',
+          yref: 'paper',
+          x0: props.earliestDate,
+          x1: props.latestDate,
+          y0: 0,
+          y1: 1,
+          fillcolor: 'rgba(236, 72, 153, 0.10)',
+          line: { width: 0 },
+          layer: 'below'
+        }]
+      : [],
     hovermode: 'x unified',
     dragmode: false,
     showlegend: true,
     hoverlabel: {
-      bgcolor: isDark.value === 'dark' ? '#1f2937' : '#ffffff',
-      bordercolor: isDark.value === 'dark' ? '#374151' : '#e5e7eb',
-      font: {
-        color: isDark.value === 'dark' ? '#ffffff' : '#374151'
-      }
+      bgcolor: colorMode.value === 'dark' ? '#1f2937' : '#ffffff',
+      bordercolor: colorMode.value === 'dark' ? '#374151' : '#e5e7eb',
+      font: { color: colorMode.value === 'dark' ? '#ffffff' : '#374151' }
     },
     legend: {
       orientation: 'h',
-      y: -0.2,
-      font: {
-        color: isDark.value === 'dark' ? '#ffffff' : '#000000'
-      }
+      y: -0.22,
+      font: { color: colorMode.value === 'dark' ? '#ffffff' : '#000000' }
     },
-    margin: { t: 60, b: 80, l: 60, r: 40 },
+    margin: { t: 40, b: 120, l: 65, r: 55 },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
-    font: {
-      color: isDark.value === 'dark' ? '#ffffff' : '#374151'
-    }
+    font: { color: colorMode.value === 'dark' ? '#ffffff' : '#374151' },
+    barmode: 'overlay'
   }
 
-  const config = {
+  Plotly.react(chartContainer.value, traces, layout, {
     responsive: true,
     displayModeBar: false,
     displaylogo: false
-  }
-
-  Plotly.newPlot(chartContainer.value, traces, layout, config)
+  })
 }
 
-// Watch for data changes and recreate chart
-watch([chartData, () => props.appliedDate, isDark, locale], () => {
-  nextTick(() => {
-    createChart()
-  })
-}, { deep: true })
+watch([
+  chartData,
+  () => props.appliedDate,
+  () => props.earliestDate,
+  () => props.latestDate,
+  colorMode,
+  locale
+], () => nextTick(createChart), { deep: true })
 
-// Create chart on mount
-onMounted(() => {
-  nextTick(() => {
-    createChart()
-  })
-})
+onMounted(() => nextTick(createChart))
 
-// Clean up on unmount
 onUnmounted(() => {
-  if (chartContainer.value) {
-    Plotly.purge(chartContainer.value)
-  }
+  if (chartContainer.value) Plotly.purge(chartContainer.value)
 })
 </script>

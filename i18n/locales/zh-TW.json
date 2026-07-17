@@ -13,14 +13,15 @@
   "latestAvailableDate": "官方統計資料最新可參考日期：{date}",
   "viewRawData": "查看原始資料",
   "ifAppliedIn": "如果您在 {date} 申請，以下是您的預測：",
-  "applicationProcessed": "（您的申請可能已經處理完成！）",
+  "applicationProcessed": "模型推算已進入可能通知區間；尚未收到通知仍屬正常情況。",
+  "predictionDisclaimer": "此結果採保守估算：入管統計無法辨識個別案件，也不代表案件依申請順序處理。請將日期視為規劃區間，而非核發保證。",
   "dataNotAvailable": "目前，您指定日期的官方資料尚未提供。使用最新可用資料進行估算。",
   "usingDataUpTo": "使用到 {date} 為止的資料進行估算：",
-  "inQueue": "排隊中",
-  "monthlySolved": "每月處理",
+  "inQueue": "估計前方工作量",
+  "monthlySolved": "保守有效月處理量",
   "monthlyNew": "每月新增",
-  "earliest": "最早",
-  "latest": "最晚",
+  "earliest": "較可能自此收到通知",
+  "latest": "保守估計至",
   "toggleTheme": "切換主題",
   "light": "明亮",
   "dark": "夜間",
@@ -53,13 +54,19 @@
   },
   "chart": {
     "title": "永住申請歷史資料",
-    "disclaimer": "基於日本入國管理局官方歷史統計資料計算。實際情況可能有所不同，僅供參考。",
+    "disclaimer": "灰色虛線是假設案件完全依申請順序處理；紅線與紫線分別是較可能及保守情境。粉紅色通知區間從紅線歸零的月份開始。",
     "totalApplications": "總申請數",
     "processedApplications": "已處理申請",
     "newApplications": "新增申請",
     "remainingApplications": "剩餘申請",
+    "fifoRemaining": "依申請順序剩餘量",
+    "likelyRemaining": "較可能剩餘量（80%）",
+    "conservativeRemaining": "保守剩餘量（70%）",
+    "notificationWindow": "推估通知區間",
     "appliedDate": "您的申請日期",
     "month": "月份",
-    "applications": "申請數量"
+    "applications": "申請數量",
+    "workload": "總量／估計前方工作量",
+    "monthlyVolume": "每月新增／處理量"
   }
-} 
+}
