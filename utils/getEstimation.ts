@@ -27,7 +27,8 @@ interface ForecastScenario {
 const LIKELY_SCENARIO: ForecastScenario = {
   throughputPercentile: 0.35,
   effectiveThroughputRatio: 0.8,
-  notificationLagMonths: 1
+  // The visible notification window starts when the likely workload reaches zero.
+  notificationLagMonths: 0
 }
 
 const CONSERVATIVE_SCENARIO: ForecastScenario = {

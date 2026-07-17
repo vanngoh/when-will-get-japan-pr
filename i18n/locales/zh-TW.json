@@ -54,7 +54,7 @@
   },
   "chart": {
     "title": "永住申請歷史資料",
-    "disclaimer": "灰色虛線是假設案件完全依申請順序處理；紅線與紫線分別是較可能及保守情境。粉紅色區域為推估通知區間。",
+    "disclaimer": "灰色虛線是假設案件完全依申請順序處理；紅線與紫線分別是較可能及保守情境。粉紅色通知區間從紅線歸零的月份開始。",
     "totalApplications": "總申請數",
     "processedApplications": "已處理申請",
     "newApplications": "新增申請",

@@ -175,7 +175,9 @@ const createChart = () => {
     xaxis: {
       title: t('chart.month'),
       showgrid: false,
-      type: 'date'
+      type: 'date',
+      tickformat: '%b %Y',
+      hoverformat: '%b %Y'
     },
     yaxis: {
       title: t('chart.workload'),

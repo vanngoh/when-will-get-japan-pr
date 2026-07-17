@@ -54,7 +54,7 @@
   },
   "chart": {
     "title": "Historical PR Application Data",
-    "disclaimer": "The gray dotted line assumes cases are handled strictly in application order; red and purple show the likely and conservative paths. The pink area is the estimated notification window.",
+    "disclaimer": "The gray dotted line assumes cases are handled strictly in application order; red and purple show the likely and conservative paths. The pink notification window starts when the red line reaches zero.",
     "totalApplications": "Total Applications",
     "processedApplications": "Processed Applications",
     "newApplications": "New Applications",

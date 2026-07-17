@@ -54,7 +54,7 @@
   },
   "chart": {
     "title": "永住申请历史数据",
-    "disclaimer": "灰色虚线是假设案件完全按申请顺序处理；红线与紫线分别是较可能及保守情境。粉红色区域为推算通知区间。",
+    "disclaimer": "灰色虚线是假设案件完全按申请顺序处理；红线与紫线分别是较可能及保守情境。粉红色通知区间从红线归零的月份开始。",
     "totalApplications": "总申请数",
     "processedApplications": "已处理申请",
     "newApplications": "新增申请",
